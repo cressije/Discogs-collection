@@ -252,9 +252,8 @@ select{background:var(--cr);border:1.5px solid var(--bd);border-radius:3px;color
 </div>
 
 <script>
-var PROXY='https://touchablemusic.ch/discogs_proxy.php';
-  var DISCOGS_TOKEN='xxDfBhKXSCfnIFEkSfchZeAPbXBxcFKTHXCfNmTt';
 var CSV_URL='https://raw.githubusercontent.com/cressije/Discogs-collection/main/jil-c-collection-20260515-2039.csv';
+var DISCOGS_TOKEN=''; // <-- mets ton token ici
 var RAW_COL=[];
 var RAW_WANT=[];
 var COL=[], WANT=[];
@@ -369,12 +368,12 @@ async function runQ(){
     var item=Q[0], id=item.id;
     if(imgCache[id]!==undefined){item.cbs.forEach(function(cb){cb(imgCache[id]);});Q.shift();continue;}
     try{
-      var r=await fetch(PROXY+'?id='+id);
+      var r=await fetch('https://api.discogs.com/releases/'+id,{headers:{'Authorization':'Discogs token='+DISCOGS_TOKEN,'User-Agent':'TouchableMusicCollection/1.0'}});
       if(r.status===429){await sleep(3000);continue;}
       if(r.ok){
         var d=await r.json();
         // Utiliser le proxy comme source d'image (cache kDrive)
-        var u=d.thumb?PROXY+'?id='+id+'&img=1':null;
+        var u=d.thumb||null;
         imgCache[id]=u;
         if(d.tracklist)relCache[id]={thumb:u,tracklist:d.tracklist||[],credits:d.extraartists||[],notes:d.notes||'',styles:d.styles||[],genres:d.genres||[]};
         item.cbs.forEach(function(cb){cb(u);});
@@ -645,14 +644,14 @@ function openModal(row){
 
 async function loadModal(id){
   try{
-    var r=await fetch(PROXY+'?id='+id);
+    var r=await fetch('https://api.discogs.com/releases/'+id,{headers:{'Authorization':'Discogs token='+DISCOGS_TOKEN,'User-Agent':'TouchableMusicCollection/1.0'}});
     if(r.status===429){
       document.getElementById('pt').innerHTML='<div class="ml2">Rate limit, retry…</div>';
       setTimeout(function(){loadModal(id);},3000);return;
     }
     if(!r.ok){document.getElementById('pt').innerHTML='<div class="ml2">Erreur '+r.status+'</div>';return;}
     var d=await r.json();
-    var u=d.thumb?PROXY+'?id='+id+'&img=1':null;
+    var u=d.thumb||null;
     imgCache[id]=u;
     relCache[id]={thumb:u,tracklist:d.tracklist||[],credits:d.extraartists||[],notes:d.notes||'',styles:d.styles||[],genres:d.genres||[]};
     fillModal(relCache[id]);
