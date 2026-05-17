@@ -10,5 +10,13 @@
       "format": "LP/Album"
     }
   ],
-  "Frenchs": []
+  "Frenchs": [
+    {
+      "id": 11000821,
+      "artist": "-M-",
+      "title": "Qui De Nous Deux",
+      "year": 2017,
+      "format": "LP/Album"
+    }
+  ]
 }
