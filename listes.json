@@ -1,5 +1,13 @@
 {
   "Disco/Boogie": [],
   "HipHop/BoomBap": [],
-  "AOR/SoftRock": []
+  "AOR/SoftRock": [
+    {
+      "id": 3344574,
+      "artist": "Steely Dan",
+      "title": "Aja",
+      "year": 1982,
+      "format": "LP/Album"
+    }
+  ]
 }
