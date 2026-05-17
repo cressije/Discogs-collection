@@ -16,7 +16,7 @@
 body{background:var(--bg);color:var(--tx);font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;min-height:100vh}
 .app{display:flex;min-height:100vh}
 /* SIDEBAR */
-.sb{width:250px;flex-shrink:0;background:var(--wh);border-right:1px solid var(--bd);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+.sb{width:250px;flex-shrink:0;background:var(--wh);border-right:1px solid var(--bd);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;z-index:10}
 .sb-logo{background:var(--bk);padding:18px 20px;display:flex;align-items:center;gap:12px}
 .sb-disc{width:36px;height:36px;border-radius:50%;background:var(--y);display:flex;align-items:center;justify-content:center;font-size:16px}
 .sb-name{color:var(--wh)}
@@ -359,7 +359,7 @@ select{background:var(--cr);border:1.5px solid var(--bd);border-radius:3px;color
 
 <script>
 var CSV_URL='https://raw.githubusercontent.com/cressije/Discogs-collection/main/jil-c-collection-20260515-2039.csv';
-var DISCOGS_TOKEN='xxDfBhKXSCfnIFEkSfchZeAPbXBxcFKTHXCfNmTt'; // mets ton token ici
+var DISCOGS_TOKEN=''; // mets ton token ici
 var RAW_COL=[];
 var RAW_WANT=[];
 var COL=[], WANT=[];
@@ -652,11 +652,13 @@ document.querySelectorAll('.ni').forEach(function(ni){
     var v=this.dataset.view;
     document.querySelectorAll('.ni').forEach(function(x){x.classList.remove('on');});
     this.classList.add('on');
-    ['collection','wantlist','stats'].forEach(function(id){
-      document.getElementById('v-'+id).style.display=v===id?'block':'none';
+    ['collection','wantlist','stats','listes'].forEach(function(id){
+      var el=document.getElementById('v-'+id);
+      if(el)el.style.display=v===id?'block':'none';
     });
     if(v==='wantlist')filterWant();
     if(v==='stats')buildStats();
+    if(v==='listes'&&GH_TOKEN)renderListes();
   });
 });
 
@@ -1064,20 +1066,8 @@ async function createNewListe(){
   setTimeout(showPicker,200);
 }
 
-// Nav LISTES
-document.querySelectorAll('.ni').forEach(function(ni){
-  ni.addEventListener('click',function(){
-    var view=ni.dataset.view;
-    if(view==='listes'){
-      document.querySelectorAll('.ni').forEach(function(x){x.classList.remove('on');});
-      ni.classList.add('on');
-      document.querySelectorAll('[id^="v-"]').forEach(function(v){v.style.display='none';});
-      document.getElementById('v-listes').style.display='block';
-      // Auto-connect si token déjà là
-      if(GH_TOKEN)renderListes();
-    }
-  });
-});
+
+
 
 </script>
 
