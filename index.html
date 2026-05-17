@@ -142,6 +142,87 @@ select{background:var(--cr);border:1.5px solid var(--bd);border-radius:3px;color
 /* NOTES */
 .notes{font-size:13px;color:var(--mu);line-height:1.7;white-space:pre-wrap}
 @media(max-width:700px){.sb{display:none}.sg{grid-template-columns:1fr 1fr}}
+
+/* DETAIL PANEL */
+.dp{position:fixed;top:0;right:-320px;width:320px;height:100vh;background:var(--wh);
+  border-left:1px solid var(--bd);z-index:200;transition:right .25s ease;
+  display:flex;flex-direction:column;overflow:hidden;}
+.dp.open{right:0;}
+.dp-close{position:absolute;top:10px;right:12px;font-size:20px;cursor:pointer;
+  color:var(--mu);background:none;border:none;line-height:1;z-index:2;}
+.dp-cover{width:100%;aspect-ratio:1;background:#f0f0f0;cursor:pointer;position:relative;
+  overflow:hidden;flex-shrink:0;}
+.dp-cover img{width:100%;height:100%;object-fit:cover;display:block;}
+.dp-cover .dp-ph{position:absolute;inset:0;display:flex;align-items:center;
+  justify-content:center;font-size:48px;}
+.dp-cover .dp-zoom{position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.5);
+  color:#fff;border:none;border-radius:50%;width:32px;height:32px;font-size:14px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.dp-body{flex:1;overflow-y:auto;padding:14px 16px;}
+.dp-artist{font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;}
+.dp-title{font-size:15px;font-weight:700;color:var(--bk);line-height:1.3;margin-bottom:6px;}
+.dp-meta{font-size:11px;color:var(--mu);margin-bottom:12px;}
+/* Étoiles */
+.dp-stars{display:flex;gap:4px;margin-bottom:14px;}
+.dp-star{font-size:22px;cursor:pointer;color:#ddd;transition:color .1s;line-height:1;}
+.dp-star.on{color:#f5c518;}
+.dp-star:hover,.dp-star:hover~.dp-star{color:#ddd;}
+.dp-stars:hover .dp-star{color:#f5c518;}
+.dp-stars .dp-star:hover~.dp-star{color:#ddd;}
+/* Actions */
+.dp-actions{display:flex;flex-direction:column;gap:8px;}
+.dp-btn{display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:6px;
+  border:1px solid var(--bd);font-size:12px;font-weight:600;cursor:pointer;
+  background:var(--wh);color:var(--bk);transition:background .12s;}
+.dp-btn:hover{background:var(--bg);}
+.dp-btn.primary{background:var(--pk);color:#fff;border-color:var(--pk);}
+.dp-btn.primary:hover{background:var(--pkd);}
+.dp-btn svg{width:15px;height:15px;flex-shrink:0;}
+/* MODAL overlay quand panel ouvert */
+.dp-overlay{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:199;display:none;}
+.dp-overlay.show{display:block;}
+
+/* LISTES view */
+#v-listes .ph{background:var(--wh);border-bottom:2px solid var(--pk);}
+.liste-item{display:flex;align-items:center;justify-content:space-between;
+  padding:12px 28px;border-bottom:1px solid var(--bd);background:var(--wh);}
+.liste-item:hover{background:var(--bg);}
+.liste-name{font-weight:600;font-size:14px;}
+.liste-count{font-size:11px;color:var(--mu);}
+.liste-del{background:none;border:none;color:var(--mu);cursor:pointer;font-size:16px;padding:4px;}
+.liste-del:hover{color:#e03e3e;}
+.new-liste-bar{padding:14px 28px;border-bottom:1px solid var(--bd);display:flex;gap:8px;}
+.new-liste-bar input{flex:1;padding:8px 10px;border:1px solid var(--bd);border-radius:6px;font-size:13px;}
+.new-liste-bar button{padding:8px 14px;background:var(--pk);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;}
+
+/* Auth popup */
+.auth-popup{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;
+  display:none;align-items:center;justify-content:center;}
+.auth-popup.show{display:flex;}
+.auth-box{background:#fff;border-radius:12px;padding:28px;width:340px;max-width:90vw;}
+.auth-box h3{font-size:16px;font-weight:700;margin-bottom:8px;}
+.auth-box p{font-size:12px;color:var(--mu);margin-bottom:16px;line-height:1.5;}
+.auth-box input{width:100%;padding:10px 12px;border:1px solid var(--bd);border-radius:6px;
+  font-size:13px;margin-bottom:12px;font-family:monospace;}
+.auth-box .auth-btns{display:flex;gap:8px;}
+.auth-box .auth-btns button{flex:1;padding:9px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;}
+.auth-ok{background:var(--pk);color:#fff;border:none;}
+.auth-cancel{background:none;border:1px solid var(--bd);color:var(--bk);}
+
+/* Liste picker popup */
+.picker-popup{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;
+  display:none;align-items:center;justify-content:center;}
+.picker-popup.show{display:flex;}
+.picker-box{background:#fff;border-radius:12px;padding:24px;width:320px;max-width:90vw;max-height:80vh;overflow-y:auto;}
+.picker-box h3{font-size:15px;font-weight:700;margin-bottom:14px;}
+.picker-liste{padding:10px 12px;border-radius:6px;cursor:pointer;font-size:13px;
+  border:1px solid var(--bd);margin-bottom:6px;display:flex;justify-content:space-between;}
+.picker-liste:hover{background:var(--pkl);border-color:var(--pk);}
+.picker-new{width:100%;padding:9px;background:var(--pk);color:#fff;border:none;
+  border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;margin-top:8px;}
+.picker-cancel{width:100%;padding:9px;background:none;border:1px solid var(--bd);
+  border-radius:6px;font-size:13px;cursor:pointer;margin-top:6px;}
+
 </style>
 </head>
 <body>
@@ -157,6 +238,10 @@ select{background:var(--cr);border:1.5px solid var(--bd);border-radius:3px;color
       Collection
     </div>
 
+    <div class="ni" data-view="listes">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
+      Listes
+    </div>
     <div class="ni" data-view="stats">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
       Statistiques
@@ -212,6 +297,22 @@ select{background:var(--cr);border:1.5px solid var(--bd);border-radius:3px;color
     <div class="lm" id="wlm" onclick="loadMore('w')" style="display:none">↓ Charger plus</div>
   </div>
 
+
+  <div id="v-listes" style="display:none">
+    <div class="ph"><div class="pt">Listes</div></div>
+    <div class="new-liste-bar" id="listes-auth-bar" style="display:none">
+      <input id="new-liste-input" placeholder="Nom de la liste…">
+      <button onclick="addListe()">Créer</button>
+    </div>
+    <div id="listes-connect" style="padding:20px 28px">
+      <button class="dp-btn primary" style="display:inline-flex" onclick="requireAuth(renderListes)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Se connecter avec token GitHub
+      </button>
+    </div>
+    <div id="listes-content" style="display:none"></div>
+  </div>
+
   <div id="v-stats" style="display:none">
     <div class="ph"><div class="pt">Statistiques</div></div>
     <div class="sg" id="scards"></div>
@@ -258,7 +359,7 @@ select{background:var(--cr);border:1.5px solid var(--bd);border-radius:3px;color
 
 <script>
 var CSV_URL='https://raw.githubusercontent.com/cressije/Discogs-collection/main/jil-c-collection-20260515-2039.csv';
-var DISCOGS_TOKEN='xxDfBhKXSCfnIFEkSfchZeAPbXBxcFKTHXCfNmTt'; // mets ton token ici
+var DISCOGS_TOKEN=''; // mets ton token ici
 var RAW_COL=[];
 var RAW_WANT=[];
 var COL=[], WANT=[];
@@ -416,6 +517,7 @@ function makeRow(r){
   var meta=[r.label,r.folder].filter(function(x){return x&&x!=='nan';}).join(' · ');
   var div=document.createElement('div');
   div.className='rr';
+  div.onclick=function(){openDetail(div);};
   div.dataset.rid=String(r.id);
   div.dataset.artist=r.artist;
   div.dataset.title=r.title;
@@ -730,6 +832,311 @@ setupGrid('wgrid');
 
 
 loadData();
+
+// ── DETAIL PANEL ──────────────────────────────────────────────────────────
+var detailRow=null;
+
+function openDetail(row){
+  detailRow=row;
+  var id=parseInt(row.dataset.rid)||0;
+  var artist=row.dataset.artist||'';
+  var title=row.dataset.title||'';
+  var label=row.dataset.label||'';
+  var format=row.dataset.format||'';
+  var year=parseInt(row.dataset.year)||0;
+  var yr=year>1900?String(year):'—';
+
+  document.getElementById('dp-artist').textContent=artist;
+  document.getElementById('dp-title').textContent=title;
+  document.getElementById('dp-meta').textContent=[yr,format,label].filter(function(x){return x&&x!=='nan';}).join(' · ');
+
+  // Étoiles — rating depuis les data
+  var rating=parseInt(row.dataset.rating)||0;
+  renderStars(rating);
+
+  // Pochette
+  var img=document.getElementById('dp-img');
+  var ph=document.getElementById('dp-ph');
+  img.style.display='none'; ph.style.display='flex';
+  if(id){
+    if(imgCache[id]){
+      img.src=imgCache[id]; img.style.display='block'; ph.style.display='none';
+    } else {
+      fetchThumb(id,function(u){
+        if(u){img.src=u;img.style.display='block';ph.style.display='none';}
+      });
+    }
+  }
+
+  document.getElementById('detail-panel').classList.add('open');
+  document.getElementById('dp-overlay').classList.add('show');
+}
+
+function closeDetail(){
+  document.getElementById('detail-panel').classList.remove('open');
+  document.getElementById('dp-overlay').classList.remove('show');
+  detailRow=null;
+}
+
+function openModalFromDetail(){
+  if(detailRow){openModal(detailRow);}
+}
+
+// Étoiles
+function renderStars(val){
+  document.querySelectorAll('.dp-star').forEach(function(s){
+    s.classList.toggle('on', parseInt(s.dataset.v)<=val);
+  });
+}
+document.querySelectorAll('.dp-star').forEach(function(s){
+  s.addEventListener('mouseover',function(){
+    var v=parseInt(s.dataset.v);
+    document.querySelectorAll('.dp-star').forEach(function(x){
+      x.classList.toggle('on',parseInt(x.dataset.v)<=v);
+    });
+  });
+  s.addEventListener('click',function(){
+    var v=parseInt(s.dataset.v);
+    if(detailRow)detailRow.dataset.rating=String(v);
+    renderStars(v);
+  });
+  s.addEventListener('mouseleave',function(){
+    var val=detailRow?parseInt(detailRow.dataset.rating)||0:0;
+    renderStars(val);
+  });
+});
+
+// ── AUTH GITHUB ────────────────────────────────────────────────────────────
+var GH_TOKEN=null;
+var GH_USER='cressije';
+var GH_REPO='Discogs-collection';
+var GH_FILE='listes.json';
+var authCallback=null;
+
+function requireAuth(cb){
+  if(GH_TOKEN){cb();return;}
+  authCallback=cb;
+  document.getElementById('auth-popup').classList.add('show');
+  setTimeout(function(){document.getElementById('auth-token-input').focus();},100);
+}
+
+function closeAuth(){
+  document.getElementById('auth-popup').classList.remove('show');
+  document.getElementById('auth-token-input').value='';
+  authCallback=null;
+}
+
+async function confirmAuth(){
+  var t=document.getElementById('auth-token-input').value.trim();
+  if(!t)return;
+  // Vérifier le token
+  try{
+    var r=await fetch('https://api.github.com/user',{headers:{'Authorization':'token '+t}});
+    if(!r.ok){alert('Token invalide');return;}
+    GH_TOKEN=t;
+    document.getElementById('auth-token-input').value='';
+    document.getElementById('auth-popup').classList.remove('show');
+    if(authCallback){authCallback();authCallback=null;}
+  }catch(e){alert('Erreur: '+e.message);}
+}
+
+// ── LISTES GITHUB ──────────────────────────────────────────────────────────
+var LISTES={};  // {nomListe: [{id, artist, title, year, format}]}
+var listesFileSha=null;
+
+async function loadListes(){
+  try{
+    var r=await fetch('https://api.github.com/repos/'+GH_USER+'/'+GH_REPO+'/contents/'+GH_FILE,{
+      headers:{'Authorization':'token '+GH_TOKEN,'Accept':'application/vnd.github.v3+json'}
+    });
+    if(r.status===404){LISTES={};listesFileSha=null;return;}
+    var d=await r.json();
+    listesFileSha=d.sha;
+    LISTES=JSON.parse(atob(d.content.replace(/
+/g,'')));
+  }catch(e){LISTES={};}
+}
+
+async function saveListes(){
+  var content=btoa(unescape(encodeURIComponent(JSON.stringify(LISTES,null,2))));
+  var body={message:'Update listes.json',content:content};
+  if(listesFileSha)body.sha=listesFileSha;
+  var r=await fetch('https://api.github.com/repos/'+GH_USER+'/'+GH_REPO+'/contents/'+GH_FILE,{
+    method:'PUT',
+    headers:{'Authorization':'token '+GH_TOKEN,'Content-Type':'application/json'},
+    body:JSON.stringify(body)
+  });
+  var d=await r.json();
+  if(d.content)listesFileSha=d.content.sha;
+}
+
+async function renderListes(){
+  await loadListes();
+  document.getElementById('listes-connect').style.display='none';
+  document.getElementById('listes-auth-bar').style.display='flex';
+  document.getElementById('listes-content').style.display='block';
+  var div=document.getElementById('listes-content');
+  div.innerHTML='';
+  var names=Object.keys(LISTES);
+  if(!names.length){
+    div.innerHTML='<div style="padding:20px 28px;color:var(--mu);font-size:13px">Aucune liste — crée-en une !</div>';
+    return;
+  }
+  names.forEach(function(name){
+    var items=LISTES[name]||[];
+    var row=document.createElement('div'); row.className='liste-item';
+    row.innerHTML='<div><div class="liste-name">'+e(name)+'</div><div class="liste-count">'+items.length+' disque'+(items.length>1?'s':'')+'</div></div>'+
+      '<button class="liste-del" onclick="deleteListe(''+name.replace(/'/g,"\'")+'')" title="Supprimer">🗑</button>';
+    div.appendChild(row);
+  });
+}
+
+function addListe(){
+  var name=document.getElementById('new-liste-input').value.trim();
+  if(!name)return;
+  if(LISTES[name]){alert('Liste déjà existante');return;}
+  LISTES[name]=[];
+  document.getElementById('new-liste-input').value='';
+  saveListes().then(renderListes);
+}
+
+async function deleteListe(name){
+  if(!confirm('Supprimer la liste "'+name+'" ?'))return;
+  delete LISTES[name];
+  await saveListes();
+  renderListes();
+}
+
+// ── PICKER ─────────────────────────────────────────────────────────────────
+function showPicker(){
+  requireAuth(function(){
+    loadListes().then(function(){
+      var div=document.getElementById('picker-list');
+      div.innerHTML='';
+      var names=Object.keys(LISTES);
+      if(!names.length){
+        div.innerHTML='<div style="color:var(--mu);font-size:12px;margin-bottom:8px">Aucune liste — crée-en une !</div>';
+      }
+      names.forEach(function(name){
+        var el=document.createElement('div'); el.className='picker-liste';
+        el.innerHTML='<span>'+e(name)+'</span><span style="color:var(--mu);font-size:11px">'+(LISTES[name]||[]).length+' disques</span>';
+        el.onclick=function(){addToListe(name);};
+        div.appendChild(el);
+      });
+      document.getElementById('picker-popup').classList.add('show');
+    });
+  });
+}
+
+function closePicker(){
+  document.getElementById('picker-popup').classList.remove('show');
+}
+
+async function addToListe(name){
+  if(!detailRow){closePicker();return;}
+  var item={
+    id:parseInt(detailRow.dataset.rid)||0,
+    artist:detailRow.dataset.artist||'',
+    title:detailRow.dataset.title||'',
+    year:parseInt(detailRow.dataset.year)||0,
+    format:detailRow.dataset.fmt||''
+  };
+  if(!LISTES[name])LISTES[name]=[];
+  // Éviter doublons
+  var exists=LISTES[name].some(function(x){return x.id===item.id;});
+  if(exists){alert('Déjà dans cette liste !');closePicker();return;}
+  LISTES[name].push(item);
+  await saveListes();
+  closePicker();
+  // Feedback
+  var btn=document.querySelector('.dp-btn.primary');
+  if(btn){var orig=btn.innerHTML;btn.innerHTML='✓ Ajouté !';setTimeout(function(){btn.innerHTML=orig;},1500);}
+}
+
+async function createNewListe(){
+  var name=prompt('Nom de la nouvelle liste :');
+  if(!name||!name.trim())return;
+  name=name.trim();
+  if(LISTES[name]){alert('Liste déjà existante');return;}
+  LISTES[name]=[];
+  await saveListes();
+  closePicker();
+  // Rouvrir le picker
+  setTimeout(showPicker,200);
+}
+
+// Nav LISTES
+document.querySelectorAll('.ni').forEach(function(ni){
+  ni.addEventListener('click',function(){
+    var view=ni.dataset.view;
+    if(view==='listes'){
+      document.querySelectorAll('.ni').forEach(function(x){x.classList.remove('on');});
+      ni.classList.add('on');
+      document.querySelectorAll('[id^="v-"]').forEach(function(v){v.style.display='none';});
+      document.getElementById('v-listes').style.display='block';
+      // Auto-connect si token déjà là
+      if(GH_TOKEN)renderListes();
+    }
+  });
+});
+
 </script>
+
+<!-- DETAIL PANEL -->
+<div class="dp-overlay" id="dp-overlay" onclick="closeDetail()"></div>
+<div class="dp" id="detail-panel">
+  <button class="dp-close" onclick="closeDetail()">×</button>
+  <div class="dp-cover" id="dp-cover" onclick="openModalFromDetail()">
+    <div class="dp-ph" id="dp-ph">🎵</div>
+    <img id="dp-img" src="" alt="" style="display:none">
+    <button class="dp-zoom" onclick="event.stopPropagation();openModalFromDetail()" title="Voir détail complet">⤢</button>
+  </div>
+  <div class="dp-body">
+    <div class="dp-artist" id="dp-artist"></div>
+    <div class="dp-title" id="dp-title"></div>
+    <div class="dp-meta" id="dp-meta"></div>
+    <div class="dp-stars" id="dp-stars">
+      <span class="dp-star" data-v="1">★</span>
+      <span class="dp-star" data-v="2">★</span>
+      <span class="dp-star" data-v="3">★</span>
+      <span class="dp-star" data-v="4">★</span>
+      <span class="dp-star" data-v="5">★</span>
+    </div>
+    <div class="dp-actions">
+      <button class="dp-btn primary" onclick="showPicker()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Ajouter à une liste
+      </button>
+      <button class="dp-btn" onclick="openModalFromDetail()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        Voir fiche complète
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- AUTH POPUP -->
+<div class="auth-popup" id="auth-popup">
+  <div class="auth-box">
+    <h3>🔐 Authentification GitHub</h3>
+    <p>Pour gérer tes listes, saisis ton token GitHub (public_repo). Il reste en mémoire le temps de ta session.</p>
+    <input type="password" id="auth-token-input" placeholder="ghp_xxxxxxxxxxxx">
+    <div class="auth-btns">
+      <button class="auth-cancel" onclick="closeAuth()">Annuler</button>
+      <button class="auth-ok" onclick="confirmAuth()">Valider</button>
+    </div>
+  </div>
+</div>
+
+<!-- LISTE PICKER -->
+<div class="picker-popup" id="picker-popup">
+  <div class="picker-box">
+    <h3>Ajouter à une liste</h3>
+    <div id="picker-list"></div>
+    <button class="picker-new" onclick="createNewListe()">+ Nouvelle liste</button>
+    <button class="picker-cancel" onclick="closePicker()">Annuler</button>
+  </div>
+</div>
+
 </body>
 </html>
