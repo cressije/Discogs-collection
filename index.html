@@ -250,7 +250,7 @@ select{background:var(--cr);border:1.5px solid var(--bd);border-radius:3px;color
   </div>
   <!-- Détail dans la sidebar -->
   <div class="dp" id="detail-panel">
-    <button class="dp-close" onclick="closeDetail()">× fermer</button>
+    <div style="padding:10px 12px 0"><button class="dp-btn" onclick="closeDetail()" style="width:100%;justify-content:center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>Retour aux genres</button></div>
     <div class="dp-cover" id="dp-cover">
       <div class="dp-ph" id="dp-ph">🎵</div>
       <img id="dp-img" src="" alt="" style="display:none">
@@ -386,7 +386,7 @@ select{background:var(--cr);border:1.5px solid var(--bd);border-radius:3px;color
 
 <script>
 var CSV_URL='https://raw.githubusercontent.com/cressije/Discogs-collection/main/jil-c-collection-20260515-2039.csv';
-var DISCOGS_TOKEN='xxDfBhKXSCfnIFEkSfchZeAPbXBxcFKTHXCfNmTt'; // mets ton token ici
+var DISCOGS_TOKEN=''; // mets ton token ici
 var RAW_COL=[];
 var RAW_WANT=[];
 var COL=[], WANT=[];
