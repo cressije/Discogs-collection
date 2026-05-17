@@ -177,6 +177,10 @@ select{background:var(--cr);border:1.5px solid var(--bd);border-radius:3px;color
 .dp-btn.primary{background:var(--pk);color:#fff;border-color:var(--pk);}
 .dp-btn.primary:hover{background:var(--pkd);}
 .dp-btn svg{width:15px;height:15px;flex-shrink:0;}
+.dp-in-listes{margin-top:4px;padding:0 2px;}
+.dp-in-listes-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--mu);margin-bottom:5px;}
+.dp-in-listes-tags{display:flex;flex-wrap:wrap;gap:4px;}
+.dp-liste-tag{font-size:10px;font-weight:600;background:var(--pkl);color:var(--pk);border:1px solid var(--pk);border-radius:3px;padding:2px 7px;font-family:'Barlow Condensed',sans-serif;letter-spacing:.04em;}
 
 /* LISTES view */
 #v-listes .ph{background:var(--wh);border-bottom:2px solid var(--pk);}
@@ -346,6 +350,10 @@ select{background:var(--cr);border:1.5px solid var(--bd);border-radius:3px;color
           Voir fiche complète
         </button>
       </div>
+      <div class="dp-in-listes" id="dp-in-listes" style="display:none">
+        <div class="dp-in-listes-label">Dans les listes</div>
+        <div class="dp-in-listes-tags" id="dp-in-listes-tags"></div>
+      </div>
     </div>
   </div>
   <div class="sb-foot">
@@ -456,7 +464,7 @@ select{background:var(--cr);border:1.5px solid var(--bd);border-radius:3px;color
 
 <script>
 var CSV_URL='https://raw.githubusercontent.com/cressije/Discogs-collection/main/jil-c-collection-20260515-2039.csv';
-var DISCOGS_TOKEN='xxDfBhKXSCfnIFEkSfchZeAPbXBxcFKTHXCfNmTt'; // mets ton token ici
+var DISCOGS_TOKEN=''; // mets ton token ici
 var RAW_COL=[];
 var RAW_WANT=[];
 var COL=[], WANT=[];
@@ -751,6 +759,7 @@ function renderGrid(gid,data,page){
 
 // ── FILTER/SORT ───────────────────────────────────────
 var cF=[].concat(COL), wF=[].concat(WANT), cPg=0, wPg=0;
+var aListe=null; // filtre liste actif
 var aFmt='all', aGenre='all';
 var srchTimer=null;
 
@@ -769,7 +778,9 @@ function onSrch(){clearTimeout(srchTimer);srchTimer=setTimeout(filterCol,200);}
 function filterCol(){
   var q=(document.getElementById('csearch').value||'').toLowerCase().trim();
   var s=document.getElementById('csort').value;
+  var listeIds=aListe?(LISTES[aListe]||[]).map(function(x){return x.id;}):null;
   cF=COL.filter(function(r){
+    if(listeIds&&listeIds.indexOf(r.id)<0)return false;
     if(aFmt!=='all'&&r.fmt!==aFmt)return false;
     if(aGenre!=='all'&&r.folder!==aGenre)return false;
     if(!q)return true;
@@ -782,6 +793,35 @@ function filterCol(){
   document.getElementById('cpc').textContent=cF.length.toLocaleString('fr')+' enr.';
   renderGrid('cgrid',cF,showAll?9999:0);
   document.getElementById('clm').style.display=(!showAll&&cF.length>50)?'block':'none';
+}
+
+function filterByListe(name){
+  aListe=name;
+  // Basculer vers la vue collection
+  document.querySelectorAll('.ni').forEach(function(x){x.classList.remove('on');});
+  document.querySelector('.ni[data-view="collection"]').classList.add('on');
+  ['collection','wantlist','stats','listes'].forEach(function(id){
+    var el=document.getElementById('v-'+id);
+    if(el)el.style.display=id==='collection'?'block':'none';
+  });
+  // Badge dans le header
+  var badge=document.getElementById('liste-badge');
+  if(name){
+    if(!badge){
+      badge=document.createElement('div');
+      badge.id='liste-badge';
+      badge.style.cssText='display:inline-flex;align-items:center;gap:6px;background:var(--pkl);color:var(--pk);border:1px solid var(--pk);border-radius:3px;padding:3px 10px;font-size:11px;font-weight:700;font-family:"Barlow Condensed",sans-serif;letter-spacing:.04em;cursor:pointer;';
+      badge.title='Cliquer pour effacer le filtre liste';
+      badge.onclick=function(){filterByListe(null);};
+      document.querySelector('.ph').appendChild(badge);
+    }
+    badge.innerHTML='Liste : '+e(name)+' <span style="font-size:14px;line-height:1">×</span>';
+    badge.style.display='inline-flex';
+  } else {
+    if(badge)badge.style.display='none';
+  }
+  filterCol();
+  closeDetail();
 }
 
 function filterWant(){
@@ -1155,6 +1195,38 @@ function openModalFromAcc(btn){
   if(row)openModal(row);
 }
 
+async function renderDpListes(id){
+  var wrap=document.getElementById('dp-in-listes');
+  var tags=document.getElementById('dp-in-listes-tags');
+  tags.innerHTML='';
+  // Charger LISTES si pas encore fait (lecture seule, sans token)
+  if(!Object.keys(LISTES).length){
+    try{
+      var r=await fetch('https://raw.githubusercontent.com/'+GH_USER+'/'+GH_REPO+'/main/'+GH_FILE+'?v='+Date.now());
+      if(r.ok){
+        var txt=await r.text();
+        LISTES=JSON.parse(txt);
+      }
+    }catch(e){}
+  }
+  var found=[];
+  Object.keys(LISTES).forEach(function(name){
+    var items=LISTES[name]||[];
+    if(items.some(function(x){return x.id===id;}))found.push(name);
+  });
+  if(!found.length){wrap.style.display='none';return;}
+  wrap.style.display='block';
+  found.forEach(function(name){
+    var t=document.createElement('span');
+    t.className='dp-liste-tag';
+    t.textContent=name;
+    t.title='Double-clic pour filtrer la collection';
+    t.style.cursor='pointer';
+    t.addEventListener('dblclick',function(){filterByListe(name);});
+    tags.appendChild(t);
+  });
+}
+
 function openDetail(row){
   detailRow=row;
   var id=parseInt(row.dataset.rid)||0;
@@ -1175,6 +1247,9 @@ function openDetail(row){
   if(savedRating)row.dataset.rating=String(savedRating);
   var rating=parseInt(row.dataset.rating)||savedRating||0;
   renderStars(rating);
+
+  // Listes contenant ce disque
+  renderDpListes(id);
 
   // Pochette
   var img=document.getElementById('dp-img');
@@ -1416,8 +1491,13 @@ async function renderListes(){
   names.forEach(function(name){
     var items=LISTES[name]||[];
     var row=document.createElement('div'); row.className='liste-item';
-    row.innerHTML='<div><div class="liste-name">'+e(name)+'</div><div class="liste-count">'+items.length+' disque'+(items.length>1?'s':'')+'</div></div>'+
+    row.title='Double-clic pour afficher dans la collection';
+    row.innerHTML='<div><div class="liste-name">'+e(name)+'</div><div class="liste-count">'+items.length+' disque'+(items.length>1?'s':'')+' — <span style="color:var(--pk);font-size:10px">double-clic pour filtrer</span></div></div>'+
       '<button class="liste-del" data-name="'+name+'" title="Supprimer">🗑</button>';
+    row.addEventListener('dblclick',function(ev){
+      if(ev.target.classList.contains('liste-del'))return;
+      filterByListe(name);
+    });
     div.appendChild(row);
   });
 }
