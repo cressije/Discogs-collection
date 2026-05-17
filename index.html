@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>JIL-C · Collection</title>
+<title>JLC · Collection</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -296,7 +296,7 @@ select{background:var(--cr);border:1.5px solid var(--bd);border-radius:3px;color
 <aside class="sb">
   <div class="sb-logo">
     <div class="sb-disc">🎵</div>
-    <div class="sb-name"><strong>JIL-C</strong><span>Collection</span></div>
+    <div class="sb-name"><strong>JLC</strong><span>Collection</span></div>
   </div>
   <div class="nav">
     <div class="ni on" data-view="collection">
@@ -404,7 +404,7 @@ select{background:var(--cr);border:1.5px solid var(--bd);border-radius:3px;color
     <div id="listes-connect" style="padding:20px 28px">
       <button class="dp-btn primary" style="display:inline-flex" onclick="requireAuth(renderListes)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        Se connecter avec token GitHub
+        Se connecter
       </button>
     </div>
     <div id="listes-content" style="display:none"></div>
@@ -456,7 +456,7 @@ select{background:var(--cr);border:1.5px solid var(--bd);border-radius:3px;color
 
 <script>
 var CSV_URL='https://raw.githubusercontent.com/cressije/Discogs-collection/main/jil-c-collection-20260515-2039.csv';
-var DISCOGS_TOKEN='xxDfBhKXSCfnIFEkSfchZeAPbXBxcFKTHXCfNmTt'; // mets ton token ici
+var DISCOGS_TOKEN=''; // mets ton token ici
 var RAW_COL=[];
 var RAW_WANT=[];
 var COL=[], WANT=[];
@@ -1239,6 +1239,8 @@ document.querySelectorAll('.dp-star').forEach(function(s){
 
 // ── AUTH GITHUB ────────────────────────────────────────────────────────────
 var GH_TOKEN=null;
+var GH_STORED_TOKEN='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';
+var GH_PWD_HASH='8810e60d27fb405fc02db136cbf460415c7d4897c67cd7100321e5a0ba478f3a';
 var GH_USER='cressije';
 var GH_REPO='Discogs-collection';
 var GH_FILE='listes.json';
@@ -1349,17 +1351,25 @@ function closeAuth(){
 }
 
 async function confirmAuth(){
-  var t=document.getElementById('auth-token-input').value.trim();
-  if(!t)return;
-  // Vérifier le token
-  try{
-    var r=await fetch('https://api.github.com/user',{headers:{'Authorization':'token '+t}});
-    if(!r.ok){alert('Token invalide');return;}
-    GH_TOKEN=t;
+  var pwd=document.getElementById('auth-token-input').value.trim();
+  if(!pwd)return;
+  // Hasher le mot de passe saisi et comparer
+  var encoder=new TextEncoder();
+  var data=encoder.encode(pwd);
+  var hashBuffer=await crypto.subtle.digest('SHA-256',data);
+  var hashArray=Array.from(new Uint8Array(hashBuffer));
+  var hashHex=hashArray.map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+  var errDiv=document.getElementById('auth-error');
+  if(hashHex!==GH_PWD_HASH){
+    errDiv.style.display='block';
     document.getElementById('auth-token-input').value='';
-    document.getElementById('auth-popup').classList.remove('show');
-    if(authCallback){authCallback();authCallback=null;}
-  }catch(e){alert('Erreur: '+e.message);}
+    return;
+  }
+  errDiv.style.display='none';
+  GH_TOKEN=GH_STORED_TOKEN;
+  document.getElementById('auth-token-input').value='';
+  document.getElementById('auth-popup').classList.remove('show');
+  if(authCallback){authCallback();authCallback=null;}
 }
 
 // ── LISTES GITHUB ──────────────────────────────────────────────────────────
@@ -1497,9 +1507,10 @@ async function createNewListe(){
 <!-- AUTH POPUP -->
 <div class="auth-popup" id="auth-popup">
   <div class="auth-box">
-    <h3>🔐 Authentification GitHub</h3>
-    <p>Pour gérer tes listes, saisis ton token GitHub (public_repo). Il reste en mémoire le temps de ta session.</p>
-    <input type="password" id="auth-token-input" placeholder="ghp_xxxxxxxxxxxx">
+    <h3>🔐 Mot de passe</h3>
+    <p>Saisis ton mot de passe pour activer la sauvegarde.</p>
+    <input type="password" id="auth-token-input" placeholder="••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')confirmAuth()">
+    <div id="auth-error" style="color:#e03e3e;font-size:11px;margin-bottom:8px;display:none">Mot de passe incorrect</div>
     <div class="auth-btns">
       <button class="auth-cancel" onclick="closeAuth()">Annuler</button>
       <button class="auth-ok" onclick="confirmAuth()">Valider</button>
