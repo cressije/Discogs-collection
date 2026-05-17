@@ -386,7 +386,7 @@ select{background:var(--cr);border:1.5px solid var(--bd);border-radius:3px;color
 
 <script>
 var CSV_URL='https://raw.githubusercontent.com/cressije/Discogs-collection/main/jil-c-collection-20260515-2039.csv';
-var DISCOGS_TOKEN='xxDfBhKXSCfnIFEkSfchZeAPbXBxcFKTHXCfNmTt'; // mets ton token ici
+var DISCOGS_TOKEN=''; // mets ton token ici
 var RAW_COL=[];
 var RAW_WANT=[];
 var COL=[], WANT=[];
@@ -553,11 +553,6 @@ function makeRow(r){
   div.dataset.year=String(r.year);
   div.dataset.folder=r.folder;
   div.dataset.catalog=r.catalog;
-  // Clic sur la ligne → détail dans sidebar gauche
-  div.onclick=function(ev){
-    if(ev.target.closest('.ra-btn'))return; // laisser le bouton modal gérer
-    openDetail(div);
-  };
   div.innerHTML=
     '<div class="ry">'+yr+'</div>'+
     '<div class="rc"><div class="rph">'+em+'</div><img src="" alt=""></div>'+
@@ -568,11 +563,6 @@ function makeRow(r){
     '</div>'+
     '<div class="rf">'+e(r.fmt)+'</div>'+
     '<button class="ra-btn" title="Fiche complète">›</button>';
-  // Bouton › → modal complet
-  div.querySelector('.ra-btn').addEventListener('click',function(ev){
-    ev.stopPropagation();
-    openModal(div);
-  });
   return div;
 }
 
@@ -856,13 +846,20 @@ document.getElementById('modal').addEventListener('click',function(ev){
   if(ev.target===this)closeModal();
 });
 
-// Délégation clics sur les grids — UNE SEULE FOIS
+// Délégation clics sur les grids
 function setupGrid(gid){
   document.getElementById(gid).addEventListener('click',function(ev){
+    // Bouton modal › → ouvre le modal complet
+    var btn=ev.target.closest('.ra-btn');
+    if(btn){
+      var row=btn.closest('.rr');
+      if(row)openModal(row);
+      return;
+    }
+    // Clic sur la ligne → détail dans la sidebar
     var row=ev.target.closest('.rr');
     if(!row)return;
-    ev.stopPropagation();
-    openModal(row);
+    openDetail(row);
   });
 }
 setupGrid('cgrid');
