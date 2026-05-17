@@ -456,7 +456,7 @@ select{background:var(--cr);border:1.5px solid var(--bd);border-radius:3px;color
 
 <script>
 var CSV_URL='https://raw.githubusercontent.com/cressije/Discogs-collection/main/jil-c-collection-20260515-2039.csv';
-var DISCOGS_TOKEN='xxDfBhKXSCfnIFEkSfchZeAPbXBxcFKTHXCfNmTt'; // mets ton token ici
+var DISCOGS_TOKEN=''; // mets ton token ici
 var RAW_COL=[];
 var RAW_WANT=[];
 var COL=[], WANT=[];
@@ -1239,8 +1239,6 @@ document.querySelectorAll('.dp-star').forEach(function(s){
 
 // ── AUTH GITHUB ────────────────────────────────────────────────────────────
 var GH_TOKEN=null;
-var GH_STORED_TOKEN='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';
-var GH_PWD_HASH='8810e60d27fb405fc02db136cbf460415c7d4897c67cd7100321e5a0ba478f3a';
 var GH_USER='cressije';
 var GH_REPO='Discogs-collection';
 var GH_FILE='listes.json';
@@ -1351,22 +1349,24 @@ function closeAuth(){
 }
 
 async function confirmAuth(){
-  var pwd=document.getElementById('auth-token-input').value.trim();
-  if(!pwd)return;
-  // Hasher le mot de passe saisi et comparer
-  var encoder=new TextEncoder();
-  var data=encoder.encode(pwd);
-  var hashBuffer=await crypto.subtle.digest('SHA-256',data);
-  var hashArray=Array.from(new Uint8Array(hashBuffer));
-  var hashHex=hashArray.map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+  var token=document.getElementById('auth-token-input').value.trim();
+  if(!token)return;
   var errDiv=document.getElementById('auth-error');
-  if(hashHex!==GH_PWD_HASH){
+  try{
+    var r=await fetch('https://api.github.com/repos/'+GH_USER+'/'+GH_REPO+'/contents/'+GH_FILE,{
+      headers:{'Authorization':'token '+token,'Accept':'application/vnd.github.v3+json'}
+    });
+    if(r.status===401||r.status===403){
+      errDiv.style.display='block';
+      document.getElementById('auth-token-input').value='';
+      return;
+    }
+  }catch(e){
     errDiv.style.display='block';
-    document.getElementById('auth-token-input').value='';
     return;
   }
   errDiv.style.display='none';
-  GH_TOKEN=GH_STORED_TOKEN;
+  GH_TOKEN=token;
   document.getElementById('auth-token-input').value='';
   document.getElementById('auth-popup').classList.remove('show');
   if(authCallback){authCallback();authCallback=null;}
@@ -1507,10 +1507,10 @@ async function createNewListe(){
 <!-- AUTH POPUP -->
 <div class="auth-popup" id="auth-popup">
   <div class="auth-box">
-    <h3>🔐 Mot de passe</h3>
-    <p>Saisis ton mot de passe pour activer la sauvegarde.</p>
-    <input type="password" id="auth-token-input" placeholder="••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')confirmAuth()">
-    <div id="auth-error" style="color:#e03e3e;font-size:11px;margin-bottom:8px;display:none">Mot de passe incorrect</div>
+    <h3>🔑 Token GitHub</h3>
+    <p>Saisis ton token GitHub (fine-grained) pour activer la sauvegarde des listes et annotations.</p>
+    <input type="password" id="auth-token-input" placeholder="github_pat_..." autocomplete="off" onkeydown="if(event.key==='Enter')confirmAuth()">
+    <div id="auth-error" style="color:#e03e3e;font-size:11px;margin-bottom:8px;display:none">Token invalide ou accès refusé</div>
     <div class="auth-btns">
       <button class="auth-cancel" onclick="closeAuth()">Annuler</button>
       <button class="auth-ok" onclick="confirmAuth()">Valider</button>
