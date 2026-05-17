@@ -143,21 +143,21 @@ select{background:var(--cr);border:1.5px solid var(--bd);border-radius:3px;color
 .notes{font-size:13px;color:var(--mu);line-height:1.7;white-space:pre-wrap}
 @media(max-width:700px){.sb{display:none}.sg{grid-template-columns:1fr 1fr}}
 
-/* DETAIL PANEL */
-.dp{position:fixed;top:0;right:-320px;width:320px;height:100vh;background:var(--wh);
-  border-left:1px solid var(--bd);z-index:200;transition:right .25s ease;
-  display:flex;flex-direction:column;overflow:hidden;}
-.dp.open{right:0;}
-.dp-close{position:absolute;top:10px;right:12px;font-size:20px;cursor:pointer;
-  color:var(--mu);background:none;border:none;line-height:1;z-index:2;}
+/* Bouton modal sur chaque ligne */
+.ra-btn{background:none;border:none;color:var(--mu);font-size:18px;cursor:pointer;
+  padding:4px 8px;border-radius:4px;flex-shrink:0;transition:color .1s,background .1s;}
+.ra-btn:hover{color:var(--pk);background:var(--pkl);}
+
+/* DETAIL PANEL — dans la sidebar gauche */
+.dp{display:none;flex-direction:column;overflow:hidden;flex:1;}
+.dp.open{display:flex;}
+.dp-close{align-self:flex-end;margin:8px 8px 0;font-size:20px;cursor:pointer;
+  color:var(--mu);background:none;border:none;line-height:1;}
 .dp-cover{width:100%;aspect-ratio:1;background:#f0f0f0;cursor:pointer;position:relative;
   overflow:hidden;flex-shrink:0;}
 .dp-cover img{width:100%;height:100%;object-fit:cover;display:block;}
 .dp-cover .dp-ph{position:absolute;inset:0;display:flex;align-items:center;
   justify-content:center;font-size:48px;}
-.dp-cover .dp-zoom{position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.5);
-  color:#fff;border:none;border-radius:50%;width:32px;height:32px;font-size:14px;
-  cursor:pointer;display:flex;align-items:center;justify-content:center;}
 .dp-body{flex:1;overflow-y:auto;padding:14px 16px;}
 .dp-artist{font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;}
 .dp-title{font-size:15px;font-weight:700;color:var(--bk);line-height:1.3;margin-bottom:6px;}
@@ -166,7 +166,6 @@ select{background:var(--cr);border:1.5px solid var(--bd);border-radius:3px;color
 .dp-stars{display:flex;gap:4px;margin-bottom:14px;}
 .dp-star{font-size:22px;cursor:pointer;color:#ddd;transition:color .1s;line-height:1;}
 .dp-star.on{color:#f5c518;}
-.dp-star:hover,.dp-star:hover~.dp-star{color:#ddd;}
 .dp-stars:hover .dp-star{color:#f5c518;}
 .dp-stars .dp-star:hover~.dp-star{color:#ddd;}
 /* Actions */
@@ -178,9 +177,6 @@ select{background:var(--cr);border:1.5px solid var(--bd);border-radius:3px;color
 .dp-btn.primary{background:var(--pk);color:#fff;border-color:var(--pk);}
 .dp-btn.primary:hover{background:var(--pkd);}
 .dp-btn svg{width:15px;height:15px;flex-shrink:0;}
-/* MODAL overlay quand panel ouvert */
-.dp-overlay{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:199;display:none;}
-.dp-overlay.show{display:block;}
 
 /* LISTES view */
 #v-listes .ph{background:var(--wh);border-bottom:2px solid var(--pk);}
@@ -248,11 +244,42 @@ select{background:var(--cr);border:1.5px solid var(--bd);border-radius:3px;color
     </div>
   </div>
   <div class="sb-div"></div>
-  <div class="sb-sec">Genres</div>
-  <div id="gnav"></div>
+  <div id="sb-normal">
+    <div class="sb-sec">Genres</div>
+    <div id="gnav"></div>
+  </div>
+  <!-- Détail dans la sidebar -->
+  <div class="dp" id="detail-panel">
+    <button class="dp-close" onclick="closeDetail()">× fermer</button>
+    <div class="dp-cover" id="dp-cover">
+      <div class="dp-ph" id="dp-ph">🎵</div>
+      <img id="dp-img" src="" alt="" style="display:none">
+    </div>
+    <div class="dp-body">
+      <div class="dp-artist" id="dp-artist"></div>
+      <div class="dp-title" id="dp-title"></div>
+      <div class="dp-meta" id="dp-meta"></div>
+      <div class="dp-stars" id="dp-stars">
+        <span class="dp-star" data-v="1">★</span>
+        <span class="dp-star" data-v="2">★</span>
+        <span class="dp-star" data-v="3">★</span>
+        <span class="dp-star" data-v="4">★</span>
+        <span class="dp-star" data-v="5">★</span>
+      </div>
+      <div class="dp-actions">
+        <button class="dp-btn primary" onclick="showPicker()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Ajouter à une liste
+        </button>
+        <button class="dp-btn" onclick="openModalFromDetail()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Voir fiche complète
+        </button>
+      </div>
+    </div>
+  </div>
   <div class="sb-foot">
     <strong id="sb-count">Chargement...</strong>
-
     <div id="load-status" style="margin-top:6px;font-size:10px;color:rgba(255,255,255,.5)">Chargement...</div>
     <a href="javascript:location.reload()" style="display:block;margin-top:8px;color:var(--y);font-size:10px;letter-spacing:.04em;text-decoration:none">↻ Recharger les données</a>
   </div>
@@ -359,7 +386,7 @@ select{background:var(--cr);border:1.5px solid var(--bd);border-radius:3px;color
 
 <script>
 var CSV_URL='https://raw.githubusercontent.com/cressije/Discogs-collection/main/jil-c-collection-20260515-2039.csv';
-var DISCOGS_TOKEN='xxDfBhKXSCfnIFEkSfchZeAPbXBxcFKTHXCfNmTt'; // mets ton token ici
+var DISCOGS_TOKEN=''; // mets ton token ici
 var RAW_COL=[];
 var RAW_WANT=[];
 var COL=[], WANT=[];
@@ -517,7 +544,6 @@ function makeRow(r){
   var meta=[r.label,r.folder].filter(function(x){return x&&x!=='nan';}).join(' · ');
   var div=document.createElement('div');
   div.className='rr';
-  div.onclick=function(){openDetail(div);};
   div.dataset.rid=String(r.id);
   div.dataset.artist=r.artist;
   div.dataset.title=r.title;
@@ -527,16 +553,26 @@ function makeRow(r){
   div.dataset.year=String(r.year);
   div.dataset.folder=r.folder;
   div.dataset.catalog=r.catalog;
+  // Clic sur la ligne → détail dans sidebar gauche
+  div.onclick=function(ev){
+    if(ev.target.closest('.ra-btn'))return; // laisser le bouton modal gérer
+    openDetail(div);
+  };
   div.innerHTML=
     '<div class="ry">'+yr+'</div>'+
     '<div class="rc"><div class="rph">'+em+'</div><img src="" alt=""></div>'+
-    '<div class="ra">›</div>'+
     '<div class="rn">'+
       '<div class="rna">'+e(r.artist)+'</div>'+
       '<div class="rnt">'+e(r.title)+'</div>'+
       (meta?'<div class="rnm">'+e(meta)+'</div>':'')+
     '</div>'+
-    '<div class="rf">'+e(r.fmt)+'</div>';
+    '<div class="rf">'+e(r.fmt)+'</div>'+
+    '<button class="ra-btn" title="Fiche complète">›</button>';
+  // Bouton › → modal complet
+  div.querySelector('.ra-btn').addEventListener('click',function(ev){
+    ev.stopPropagation();
+    openModal(div);
+  });
   return div;
 }
 
@@ -852,7 +888,7 @@ function openDetail(row){
   document.getElementById('dp-title').textContent=title;
   document.getElementById('dp-meta').textContent=[yr,format,label].filter(function(x){return x&&x!=='nan';}).join(' · ');
 
-  // Étoiles — rating depuis les data
+  // Étoiles
   var rating=parseInt(row.dataset.rating)||0;
   renderStars(rating);
 
@@ -870,13 +906,14 @@ function openDetail(row){
     }
   }
 
+  // Cacher le menu normal, afficher le détail
+  document.getElementById('sb-normal').style.display='none';
   document.getElementById('detail-panel').classList.add('open');
-  document.getElementById('dp-overlay').classList.add('show');
 }
 
 function closeDetail(){
   document.getElementById('detail-panel').classList.remove('open');
-  document.getElementById('dp-overlay').classList.remove('show');
+  document.getElementById('sb-normal').style.display='block';
   detailRow=null;
 }
 
@@ -1071,38 +1108,8 @@ async function createNewListe(){
 
 </script>
 
-<!-- DETAIL PANEL -->
-<div class="dp-overlay" id="dp-overlay" onclick="closeDetail()"></div>
-<div class="dp" id="detail-panel">
-  <button class="dp-close" onclick="closeDetail()">×</button>
-  <div class="dp-cover" id="dp-cover" onclick="openModalFromDetail()">
-    <div class="dp-ph" id="dp-ph">🎵</div>
-    <img id="dp-img" src="" alt="" style="display:none">
-    <button class="dp-zoom" onclick="event.stopPropagation();openModalFromDetail()" title="Voir détail complet">⤢</button>
-  </div>
-  <div class="dp-body">
-    <div class="dp-artist" id="dp-artist"></div>
-    <div class="dp-title" id="dp-title"></div>
-    <div class="dp-meta" id="dp-meta"></div>
-    <div class="dp-stars" id="dp-stars">
-      <span class="dp-star" data-v="1">★</span>
-      <span class="dp-star" data-v="2">★</span>
-      <span class="dp-star" data-v="3">★</span>
-      <span class="dp-star" data-v="4">★</span>
-      <span class="dp-star" data-v="5">★</span>
-    </div>
-    <div class="dp-actions">
-      <button class="dp-btn primary" onclick="showPicker()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Ajouter à une liste
-      </button>
-      <button class="dp-btn" onclick="openModalFromDetail()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        Voir fiche complète
-      </button>
-    </div>
-  </div>
-</div>
+
+
 
 <!-- AUTH POPUP -->
 <div class="auth-popup" id="auth-popup">
