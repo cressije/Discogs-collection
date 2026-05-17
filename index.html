@@ -3,15 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>JLC · Collection</title>
+<title>JIL-C · Collection</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-:root{--y:#f5c518;--yd:#d4a800;--yl:#fff8d0;--bk:#111;--dk:#1a1a1a;--cr:#f8f4e8;--tx:#111;--mu:#777;--bd:#e0d8c0;--wh:#fff}
+:root{
+  --pk:#ff2d6b;--pkd:#d4004d;--pkl:#fff0f4;
+  --bk:#111111;--tx:#111111;--mu:#888888;
+  --bg:#f5f5f5;--wh:#ffffff;--bd:#e8e8e8;
+  --cr:#ffffff;--y:#ff2d6b;--yd:#d4004d;--yl:#fff0f4;
+}
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--cr);color:var(--tx);font-family:'Barlow',sans-serif;min-height:100vh}
+body{background:var(--bg);color:var(--tx);font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;min-height:100vh}
 .app{display:flex;min-height:100vh}
 /* SIDEBAR */
-.sb{width:250px;flex-shrink:0;background:var(--y);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+.sb{width:250px;flex-shrink:0;background:var(--wh);border-right:1px solid var(--bd);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
 .sb-logo{background:var(--bk);padding:18px 20px;display:flex;align-items:center;gap:12px}
 .sb-disc{width:36px;height:36px;border-radius:50%;background:var(--y);display:flex;align-items:center;justify-content:center;font-size:16px}
 .sb-name{color:var(--wh)}
@@ -20,22 +25,22 @@ body{background:var(--cr);color:var(--tx);font-family:'Barlow',sans-serif;min-he
 .nav{padding:8px 0 4px}
 .ni{display:flex;align-items:center;gap:12px;padding:12px 20px;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;color:var(--bk);border-left:3px solid transparent;transition:all .12s}
 .ni:hover{background:rgba(0,0,0,.08)}
-.ni.on{background:var(--bk);color:var(--y);border-left-color:var(--y)}
+.ni.on{background:var(--pkl);color:var(--pk);border-left:3px solid var(--pk)}
 .ni svg{width:18px;height:18px;flex-shrink:0}
 .sb-div{height:1px;background:rgba(0,0,0,.12);margin:4px 16px}
 .sb-sec{padding:10px 20px 4px;font-size:9px;font-family:'Barlow Condensed',sans-serif;letter-spacing:.12em;text-transform:uppercase;color:rgba(0,0,0,.45);font-weight:700}
 .gi{display:flex;align-items:center;gap:8px;padding:7px 20px;font-size:12px;cursor:pointer;color:rgba(0,0,0,.7);border-left:3px solid transparent;transition:all .12s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .gi:hover{background:rgba(0,0,0,.07)}
-.gi.on{background:var(--bk);color:var(--y);border-left-color:var(--y)}
+.gi.on{background:var(--pkl);color:var(--pk);border-left:3px solid var(--pk)}
 .gdot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 .sb-foot{margin-top:auto;background:var(--dk);padding:14px 20px;font-size:11px;color:rgba(255,255,255,.4);font-family:'Barlow Condensed',sans-serif}
 .sb-foot strong{color:var(--y);display:block;font-size:13px;letter-spacing:.04em;margin-bottom:4px}
 /* MAIN */
 .mn{flex:1;min-width:0}
-.ph{background:var(--bk);padding:16px 28px;display:flex;align-items:center;justify-content:space-between}
-.pt{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:700;color:var(--wh);letter-spacing:.08em;text-transform:uppercase}
+.ph{background:var(--wh);border-bottom:2px solid var(--pk);padding:16px 28px;display:flex;align-items:center;justify-content:space-between}
+.pt{font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;font-size:24px;font-weight:700;color:var(--bk);letter-spacing:.08em;text-transform:uppercase}
 .pc{font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--y)}
-.tb{background:var(--wh);border-bottom:2px solid var(--y);padding:10px 28px;display:flex;align-items:center;gap:10px}
+.tb{background:var(--wh);border-bottom:1px solid var(--bd);padding:10px 28px;display:flex;align-items:center;gap:10px}
 .si{flex:1;position:relative}
 .si svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#aaa}
 .si input{width:100%;background:var(--cr);border:1.5px solid var(--bd);border-radius:3px;padding:8px 10px 8px 34px;font-size:14px;color:var(--tx);font-family:'Barlow',sans-serif;outline:none}
@@ -45,12 +50,12 @@ select{background:var(--cr);border:1.5px solid var(--bd);border-radius:3px;color
 .fb{background:var(--cr);border-bottom:1px solid var(--bd);padding:8px 28px;display:flex;gap:5px;flex-wrap:wrap}
 .fp{padding:4px 10px;border-radius:2px;font-size:11px;cursor:pointer;border:1.5px solid var(--bd);color:var(--mu);font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:.04em;text-transform:uppercase;transition:all .12s}
 .fp:hover{border-color:#aaa;color:var(--tx)}
-.fp.on{border-color:var(--y);color:var(--bk);background:var(--y)}
+.fp.on{border-color:var(--pk);color:var(--wh);background:var(--pk)}
 .ri{padding:6px 28px;background:var(--cr);border-bottom:1px solid var(--bd);font-size:11px;color:var(--mu);font-family:'Barlow Condensed',sans-serif;letter-spacing:.05em;text-transform:uppercase}
 /* LIST */
 .rl{padding:0}
 .rr{display:flex;align-items:center;background:var(--wh);border-bottom:1px solid var(--bd);cursor:pointer;transition:background .1s}
-.rr:hover{background:#fffbee}
+.rr:hover{background:var(--pkl)}
 .ry{width:58px;flex-shrink:0;text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;color:var(--mu)}
 .rc{width:60px;height:60px;flex-shrink:0;background:#e8e0cc;position:relative;overflow:hidden}
 .rc img{width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .3s}
@@ -64,19 +69,19 @@ select{background:var(--cr);border:1.5px solid var(--bd);border-radius:3px;color
 .rnm{font-size:11px;color:var(--mu);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rf{flex-shrink:0;padding:0 14px;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mu)}
 .lm{text-align:center;padding:18px;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;color:var(--mu);background:var(--wh);border-top:1px solid var(--bd)}
-.lm:hover{color:var(--bk);background:var(--yl)}
+.lm:hover{color:var(--wh);background:var(--pk)}
 .emp{padding:40px;text-align:center;color:var(--mu);font-family:'Barlow Condensed',sans-serif;font-size:16px;letter-spacing:.06em;text-transform:uppercase}
 /* STATS */
-.sg{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:2px solid var(--y)}
+.sg{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:2px solid var(--pk)}
 .sb2{background:var(--wh);padding:18px 22px;border-right:1px solid var(--bd)}
 .sb2:last-child{border-right:none}
 .sl{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--mu);margin-bottom:5px}
 .sn{font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:700;line-height:1}
 .ss{font-size:11px;color:var(--mu);margin-top:2px}
 .sbar{height:3px;background:var(--bd);margin-top:8px}
-.sfill{height:100%;background:var(--y)}
+.sfill{height:100%;background:var(--pk)}
 .cs{padding:20px 28px}
-.ct{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:14px}
+.ct{font-family:-apple-system,sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:14px}
 .br{display:flex;align-items:center;gap:10px;margin-bottom:8px}
 .bl{font-size:12px;color:var(--tx);width:170px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bt{flex:1;height:7px;background:var(--bd);overflow:hidden}
@@ -253,7 +258,7 @@ select{background:var(--cr);border:1.5px solid var(--bd);border-radius:3px;color
 
 <script>
 var CSV_URL='https://raw.githubusercontent.com/cressije/Discogs-collection/main/jil-c-collection-20260515-2039.csv';
-var DISCOGS_TOKEN='xxDfBhKXSCfnIFEkSfchZeAPbXBxcFKTHXCfNmTt'; // <-- mets ton token ici
+var DISCOGS_TOKEN=''; // mets ton token ici
 var RAW_COL=[];
 var RAW_WANT=[];
 var COL=[], WANT=[];
@@ -333,7 +338,7 @@ async function loadData(){
     if(status)status.parentNode.removeChild(status);
   }catch(err){
     if(status)status.innerHTML=
-      '<span style="color:#f5c518">Erreur: '+err.message+'</span>';
+      '<span style="color:#e03e3e">Erreur: '+err.message+'</span>';
   }
 }
 
