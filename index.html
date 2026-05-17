@@ -238,6 +238,57 @@ select{background:var(--cr);border:1.5px solid var(--bd);border-radius:3px;color
 .ra-toggle:hover{color:var(--pk);}
 .ra-toggle.open{transform:rotate(90deg);color:var(--pk);}
 
+
+/* Onglets accordéon */
+.acc-tabs{display:flex;gap:0;border-bottom:1px solid var(--bd);margin-bottom:10px;}
+.acc-tab{padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer;color:var(--mu);
+  border-bottom:2px solid transparent;transition:color .1s;}
+.acc-tab.on{color:var(--pk);border-bottom-color:var(--pk);}
+.acc-panel{display:none;}
+.acc-panel.on{display:block;}
+/* Tracklist */
+.acc-track{display:flex;gap:8px;padding:4px 0;font-size:12px;border-bottom:1px solid #f0f0f0;}
+.acc-track:last-child{border-bottom:none;}
+.acc-tpos{color:var(--mu);min-width:28px;font-size:11px;}
+.acc-ttitle{flex:1;}
+.acc-tdur{color:var(--mu);font-size:11px;}
+/* Crédits */
+.acc-credit{display:flex;gap:8px;padding:4px 0;font-size:12px;border-bottom:1px solid #f0f0f0;}
+.acc-credit:last-child{border-bottom:none;}
+.acc-cname{flex:1;font-weight:500;}
+.acc-crole{color:var(--mu);font-size:11px;}
+/* Notes */
+.acc-notes{font-size:12px;color:var(--tx);line-height:1.6;white-space:pre-wrap;}
+/* Bouton fermer sidebar */
+.dp-header{display:flex;align-items:center;justify-content:space-between;
+  padding:10px 12px 8px;}
+.dp-header-label{font-size:10px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.08em;color:var(--mu);}
+.dp-close-btn{display:flex;align-items:center;gap:4px;padding:4px 8px;
+  border:1px solid var(--bd);border-radius:4px;font-size:11px;color:var(--mu);
+  background:none;cursor:pointer;transition:color .1s,border-color .1s;}
+.dp-close-btn:hover{color:var(--pk);border-color:var(--pk);}
+
+
+.acc-tdot{cursor:pointer;width:10px;height:10px;border-radius:50%;flex-shrink:0;
+  background:transparent;border:1.5px solid #ccc;transition:background .15s,border-color .15s;margin-top:3px;}
+.acc-tdot.r{background:#e03e3e;border-color:#e03e3e;}
+.acc-tdot.y{background:#f5c518;border-color:#f5c518;}
+.acc-tdot.b{background:#3b8add;border-color:#3b8add;}
+/* Crédits : rôle à gauche, nom en gras */
+.acc-crole{color:var(--mu);font-size:11px;min-width:90px;flex-shrink:0;}
+.acc-cname{font-weight:700;font-size:12px;}
+.acc-track-heading{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
+  color:var(--mu);padding:8px 0 3px;}
+
+
+.acc-apple-btn{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;
+  border-radius:4px;font-size:11px;font-weight:600;cursor:pointer;
+  background:#fa243c;color:#fff;border:none;text-decoration:none;transition:background .12s;}
+.acc-apple-btn:hover{background:#c8001e;}
+.acc-apple-btn svg{width:13px;height:13px;fill:#fff;flex-shrink:0;}
+.acc-apple-wrap{padding:8px 0 6px;min-height:28px;border-bottom:1px solid var(--bd);margin-bottom:4px;}
+
 </style>
 </head>
 <body>
@@ -269,7 +320,7 @@ select{background:var(--cr);border:1.5px solid var(--bd);border-radius:3px;color
   </div>
   <!-- Détail dans la sidebar -->
   <div class="dp" id="detail-panel">
-    <div style="padding:8px 12px 0;text-align:right"><button onclick="closeDetail()" style="background:none;border:1px solid var(--bd);border-radius:4px;font-size:11px;color:var(--mu);padding:3px 8px;cursor:pointer;">Fermer</button></div>
+    <div class="dp-header"><span class="dp-header-label">Détail</span><button class="dp-close-btn" onclick="closeDetail()">× Fermer</button></div>
     <div class="dp-cover" id="dp-cover">
       <div class="dp-ph" id="dp-ph">🎵</div>
       <img id="dp-img" src="" alt="" style="display:none">
@@ -405,7 +456,7 @@ select{background:var(--cr);border:1.5px solid var(--bd);border-radius:3px;color
 
 <script>
 var CSV_URL='https://raw.githubusercontent.com/cressije/Discogs-collection/main/jil-c-collection-20260515-2039.csv';
-var DISCOGS_TOKEN='xxDfBhKXSCfnIFEkSfchZeAPbXBxcFKTHXCfNmTt'; // mets ton token ici
+var DISCOGS_TOKEN=''; // mets ton token ici
 var RAW_COL=[];
 var RAW_WANT=[];
 var COL=[], WANT=[];
@@ -590,22 +641,91 @@ function makeRow(r){
   // Accordéon
   var acc=document.createElement('div');
   acc.className='rr-acc';
-  acc.innerHTML=
-    '<div class="rr-acc-row"><span class="rr-acc-k">Année</span><span class="rr-acc-v">'+yr2+'</span></div>'+
-    '<div class="rr-acc-row"><span class="rr-acc-k">Format</span><span class="rr-acc-v">'+e(r.format||r.fmt)+'</span></div>'+
-    (r.label&&r.label!=='nan'?'<div class="rr-acc-row"><span class="rr-acc-k">Label</span><span class="rr-acc-v">'+e(r.label)+'</span></div>':'')+
-    (r.catalog&&r.catalog!=='nan'?'<div class="rr-acc-row"><span class="rr-acc-k">Cat#</span><span class="rr-acc-v">'+e(r.catalog)+'</span></div>':'')+
-    (r.folder&&r.folder!=='nan'?'<div class="rr-acc-row"><span class="rr-acc-k">Genre</span><span class="rr-acc-v">'+e(r.folder)+'</span></div>':'')+
-    '<div class="rr-acc-actions">'+
-      '<button class="rr-acc-btn primary" onclick="openDetailFromAcc(this)">Détail sidebar</button>'+
-      '<button class="rr-acc-btn" onclick="openModalFromAcc(this)">Fiche complète</button>'+
-    '</div>';
 
-  // Toggle
-  div.querySelector('.ra-toggle').addEventListener('click',function(ev){
+
+
+  // Accordéon — créé avec createElement pour fiabilité
+  var rid=String(r.id||'');
+  var yr2=r.year>1900?String(r.year):'—';
+
+  // Tabs
+  var tabsDiv=document.createElement('div'); tabsDiv.className='acc-tabs';
+  [['Info','acc-info'],['Tracklist','acc-track'],['Crédits','acc-credits'],['Notes','acc-notes']].forEach(function(item,i){
+    var t=document.createElement('div'); t.className='acc-tab'+(i===1?' on':'');
+    t.dataset.p=item[1]; t.textContent=item[0]; tabsDiv.appendChild(t);
+  });
+  acc.appendChild(tabsDiv);
+
+  // Panel Info
+  var pInfo=document.createElement('div'); pInfo.className='acc-panel'; pInfo.id='acc-info-'+rid;
+  [['Année',yr2],['Format',r.format||r.fmt||''],
+   r.label&&r.label!=='nan'?['Label',r.label]:null,
+   r.catalog&&r.catalog!=='nan'?['Cat#',r.catalog]:null,
+   r.folder&&r.folder!=='nan'?['Genre',r.folder]:null
+  ].forEach(function(row){
+    if(!row)return;
+    var d=document.createElement('div'); d.className='rr-acc-row';
+    d.innerHTML='<span class="rr-acc-k">'+e(row[0])+'</span><span class="rr-acc-v">'+e(row[1])+'</span>';
+    pInfo.appendChild(d);
+  });
+  var act=document.createElement('div'); act.className='rr-acc-actions';
+  var btnM=document.createElement('button'); btnM.className='rr-acc-btn';
+  btnM.textContent='Fiche complète →';
+  btnM.onclick=function(){openModalFromAcc(btnM);};
+  act.appendChild(btnM); pInfo.appendChild(act); acc.appendChild(pInfo);
+
+  // Panel Tracklist (actif par défaut)
+  var pTrack=document.createElement('div'); pTrack.className='acc-panel on'; pTrack.id='acc-track-'+rid;
+  pTrack.innerHTML='<div style="color:var(--mu);font-size:12px;padding:4px 0">Chargement…</div>';
+  acc.appendChild(pTrack);
+
+  // Panel Crédits
+  var pCred=document.createElement('div'); pCred.className='acc-panel'; pCred.id='acc-credits-'+rid;
+  pCred.innerHTML='<div style="color:var(--mu);font-size:12px;padding:4px 0">Chargement…</div>';
+  acc.appendChild(pCred);
+
+  // Panel Notes
+  var pNote=document.createElement('div'); pNote.className='acc-panel'; pNote.id='acc-notes-'+rid;
+  pNote.innerHTML='<div style="color:var(--mu);font-size:12px;padding:4px 0">Chargement…</div>';
+  acc.appendChild(pNote);
+
+  // Onglets listener
+  acc.querySelectorAll('.acc-tab').forEach(function(tab){
+    tab.addEventListener('click',function(){
+      acc.querySelectorAll('.acc-tab').forEach(function(t){t.classList.remove('on');});
+      acc.querySelectorAll('.acc-panel').forEach(function(p){p.classList.remove('on');});
+      tab.classList.add('on');
+      var panel=document.getElementById(tab.dataset.p+'-'+rid);
+      if(panel)panel.classList.add('on');
+      if(r.id)loadAccordionData(r.id,acc);
+    });
+  });
+
+  // Toggle bouton ›
+  var toggleBtn=div.querySelector('.ra-toggle');
+  function toggleAcc(ev){
+    if(ev)ev.stopPropagation();
+    var alreadyOpen=acc.classList.contains('open');
+    // Fermer tous les accordéons ouverts
+    document.querySelectorAll('.rr-acc.open').forEach(function(a){
+      a.classList.remove('open');
+    });
+    document.querySelectorAll('.ra-toggle.open').forEach(function(b){
+      b.classList.remove('open');
+    });
+    // Si pas déjà ouvert → ouvrir
+    if(!alreadyOpen){
+      acc.classList.add('open');
+      toggleBtn.classList.add('open');
+      // Charger depuis Discogs immédiatement
+      if(r.id){loadAccordionData(r.id,acc);}
+    }
+  }
+  toggleBtn.addEventListener('click',toggleAcc);
+  // Double-clic sur la ligne → toggle accordéon
+  div.addEventListener('dblclick',function(ev){
     ev.stopPropagation();
-    var isOpen=acc.classList.toggle('open');
-    this.classList.toggle('open',isOpen);
+    toggleAcc();
   });
 
   wrap.appendChild(div);
@@ -901,8 +1021,9 @@ document.getElementById('modal').addEventListener('click',function(ev){
 // Délégation clics sur les grids
 function setupGrid(gid){
   document.getElementById(gid).addEventListener('click',function(ev){
-    if(ev.target.closest('.ra-toggle'))return; // géré par toggle
-    if(ev.target.closest('.rr-acc'))return;    // clic dans accordéon
+    if(ev.target.closest('.ra-toggle'))return;
+    if(ev.target.closest('.rr-acc'))return;
+    if(ev.target.closest('.acc-tdot'))return;
     var row=ev.target.closest('.rr');
     if(!row)return;
     openDetail(row);
@@ -913,10 +1034,117 @@ setupGrid('wgrid');
 
 
 loadData();
+loadAnnotations();
 
 // ── DETAIL PANEL ──────────────────────────────────────────────────────────
 var detailRow=null;
 
+
+
+function loadAccordionData(id, acc){
+  var trackPanel=document.getElementById('acc-track-'+id);
+  if(!trackPanel)return;
+  // Déjà chargé avec du contenu réel
+  if(trackPanel.dataset.loaded==='1')return;
+  trackPanel.dataset.loaded='1';
+  // Afficher "Chargement" dans tous les panels
+  ['acc-track','acc-credits','acc-notes'].forEach(function(p){
+    var el=document.getElementById(p+'-'+id);
+    if(el&&!el.dataset.loaded)el.innerHTML='<div style="color:var(--mu);font-size:12px;padding:8px 0">Chargement…</div>';
+  });
+
+  if(relCache[id]){
+    fillAccordion(id, acc, relCache[id]);
+    return;
+  }
+  // Charger depuis Discogs
+  fetch('https://api.discogs.com/releases/'+id,{
+    headers:{'Authorization':'Discogs token='+DISCOGS_TOKEN,'User-Agent':'TouchableMusicCollection/1.0'}
+  }).then(function(r){
+    if(r.status===429){
+      setTimeout(function(){loadAccordionData(id,acc);},3000);return;
+    }
+    return r.json();
+  }).then(function(d){
+    if(!d)return;
+    relCache[id]={thumb:d.thumb||null,tracklist:d.tracklist||[],credits:d.extraartists||[],notes:d.notes||'',styles:d.styles||[]};
+    fillAccordion(id, acc, relCache[id]);
+  }).catch(function(){});
+}
+
+function fillAccordion(id, acc, d){
+  // Bouton Apple Music — AU-DESSUS des onglets, visible depuis tous les onglets
+  var appleWrap=acc.querySelector('.acc-apple-wrap');
+  if(!appleWrap){
+    appleWrap=document.createElement('div'); appleWrap.className='acc-apple-wrap';
+    // Insérer avant les tabs (premier enfant de acc)
+    acc.insertBefore(appleWrap, acc.firstChild);
+  }
+  var row=acc.closest('.rr-wrap')&&acc.closest('.rr-wrap').querySelector('.rr');
+  if(row&&!appleWrap.dataset.searched){
+    appleWrap.dataset.searched='1';
+    appleWrap.textContent='🔍';
+    searchAppleMusic(row.dataset.artist||'',row.dataset.title||'',appleWrap);
+  }
+  // Tracklist
+  var tp=document.getElementById('acc-track-'+id);
+  if(tp){
+    if(d.tracklist&&d.tracklist.length){
+      var trackStars={};
+      tp.innerHTML=d.tracklist.map(function(t,i){
+        if(t.type_==='heading')return '<div class="acc-track-heading">'+e(t.title)+'</div>';
+        return '<div class="acc-track" data-ti="'+i+'">'+
+          '<span class="acc-tdot" data-state="0" title="Marquer"></span>'+
+          '<span class="acc-tpos">'+e(t.position||'')+'</span>'+
+          '<span class="acc-ttitle">'+e(t.title||'')+'</span>'+
+          '<span class="acc-tdur">'+e(t.duration||'')+'</span>'+
+        '</div>';
+      }).join('');
+      // Points colorés cliquables (cycle : vide → rouge → jaune → bleu → vide)
+      var states=['0','r','y','b'];
+      tp.querySelectorAll('.acc-tdot').forEach(function(dot,idx){
+        // Restaurer l'état sauvegardé
+        var tpos=d.tracklist[idx]&&d.tracklist[idx].position||String(idx);
+        var saved=getTrackAnnotation(id,tpos);
+        dot.dataset.state=saved;
+        dot.dataset.pos=tpos;
+        if(saved!=='0')dot.className='acc-tdot '+saved;
+
+        dot.addEventListener('click',function(ev){
+          ev.stopPropagation();
+          var cur=states.indexOf(this.dataset.state||'0');
+          var next=states[(cur+1)%states.length];
+          this.dataset.state=next;
+          this.className='acc-tdot'+(next!=='0'?' '+next:'');
+          // Sauvegarder
+          if(GH_TOKEN){
+            setTrackAnnotation(id,this.dataset.pos,next);
+          } else {
+            requireAuth(function(){setTrackAnnotation(id,dot.dataset.pos,next);});
+          }
+        });
+      });
+    } else { tp.innerHTML='<div style="color:var(--mu);font-size:12px">Aucune tracklist</div>'; }
+  }
+  // Crédits
+  var cp=document.getElementById('acc-credits-'+id);
+  if(cp){
+    if(d.credits&&d.credits.length){
+      cp.innerHTML=d.credits.map(function(c){
+        var role=(c.role||'').replace(/\[.*?\]/g,'').trim();
+        return '<div class="acc-credit">'+
+          '<span class="acc-crole">'+e(role)+'</span>'+
+          '<span class="acc-cname">'+e(c.name||'')+'</span>'+
+        '</div>';
+      }).join('');
+    } else { cp.innerHTML='<div style="color:var(--mu);font-size:12px">Aucun crédit</div>'; }
+  }
+  // Notes
+  var np=document.getElementById('acc-notes-'+id);
+  if(np){
+    np.innerHTML=d.notes?'<div class="acc-notes">'+e(d.notes)+'</div>':'<div style="color:var(--mu);font-size:12px">Aucune note</div>';
+  }
+}
 
 function openDetailFromAcc(btn){
   var row=btn.closest('.rr-wrap').querySelector('.rr');
@@ -941,8 +1169,11 @@ function openDetail(row){
   document.getElementById('dp-title').textContent=title;
   document.getElementById('dp-meta').textContent=[yr,format,label].filter(function(x){return x&&x!=='nan';}).join(' · ');
 
-  // Étoiles
-  var rating=parseInt(row.dataset.rating)||0;
+  // Étoiles — restaurer depuis annotations
+  var rid2=row.dataset.rid||'';
+  var savedRating=getRatingAnnotation(rid2);
+  if(savedRating)row.dataset.rating=String(savedRating);
+  var rating=parseInt(row.dataset.rating)||savedRating||0;
   renderStars(rating);
 
   // Pochette
@@ -989,7 +1220,15 @@ document.querySelectorAll('.dp-star').forEach(function(s){
   });
   s.addEventListener('click',function(){
     var v=parseInt(s.dataset.v);
-    if(detailRow)detailRow.dataset.rating=String(v);
+    if(detailRow){
+      detailRow.dataset.rating=String(v);
+      var rid=detailRow.dataset.rid;
+      if(GH_TOKEN){
+        setRatingAnnotation(rid,v);
+      } else {
+        requireAuth(function(){setRatingAnnotation(rid,v);});
+      }
+    }
     renderStars(v);
   });
   s.addEventListener('mouseleave',function(){
@@ -1003,7 +1242,98 @@ var GH_TOKEN=null;
 var GH_USER='cressije';
 var GH_REPO='Discogs-collection';
 var GH_FILE='listes.json';
+var GH_ANN_FILE='annotations.json';
 var authCallback=null;
+
+// Annotations {releaseId: {tracks:{pos:'r'|'y'|'b'}, rating:0-5}}
+var ANNOTATIONS={};
+var annFileSha=null;
+var annSaveTimer=null;
+
+
+// ── ANNOTATIONS ────────────────────────────────────────────────────────────
+async function loadAnnotations(){
+  try{
+    var r=await fetch('https://raw.githubusercontent.com/'+GH_USER+'/'+GH_REPO+'/main/'+GH_ANN_FILE+'?v='+Date.now());
+    if(!r.ok)return;
+    ANNOTATIONS=await r.json();
+  }catch(e){ANNOTATIONS={};}
+}
+
+async function saveAnnotations(){
+  if(!GH_TOKEN)return;
+  try{
+    // Récupérer le SHA actuel
+    var r=await fetch('https://api.github.com/repos/'+GH_USER+'/'+GH_REPO+'/contents/'+GH_ANN_FILE,{
+      headers:{'Authorization':'token '+GH_TOKEN,'Accept':'application/vnd.github.v3+json'}
+    });
+    if(r.ok){var d=await r.json();annFileSha=d.sha;}
+    var content=btoa(unescape(encodeURIComponent(JSON.stringify(ANNOTATIONS,null,2))));
+    var body={message:'Update annotations.json',content:content};
+    if(annFileSha)body.sha=annFileSha;
+    var r2=await fetch('https://api.github.com/repos/'+GH_USER+'/'+GH_REPO+'/contents/'+GH_ANN_FILE,{
+      method:'PUT',
+      headers:{'Authorization':'token '+GH_TOKEN,'Content-Type':'application/json'},
+      body:JSON.stringify(body)
+    });
+    var d2=await r2.json();
+    if(d2.content)annFileSha=d2.content.sha;
+  }catch(e){console.warn('Erreur save annotations:',e);}
+}
+
+function scheduleSave(){
+  clearTimeout(annSaveTimer);
+  annSaveTimer=setTimeout(function(){
+    if(GH_TOKEN)saveAnnotations();
+  },2000); // debounce 2s
+}
+
+function setTrackAnnotation(releaseId,pos,state){
+  var id=String(releaseId);
+  if(!ANNOTATIONS[id])ANNOTATIONS[id]={tracks:{},rating:0};
+  if(state==='0'||!state){
+    delete ANNOTATIONS[id].tracks[pos];
+  }else{
+    ANNOTATIONS[id].tracks[pos]=state;
+  }
+  scheduleSave();
+}
+
+function setRatingAnnotation(releaseId,rating){
+  var id=String(releaseId);
+  if(!ANNOTATIONS[id])ANNOTATIONS[id]={tracks:{},rating:0};
+  ANNOTATIONS[id].rating=rating;
+  scheduleSave();
+}
+
+function getTrackAnnotation(releaseId,pos){
+  var id=String(releaseId);
+  return (ANNOTATIONS[id]&&ANNOTATIONS[id].tracks&&ANNOTATIONS[id].tracks[pos])||'0';
+}
+
+function getRatingAnnotation(releaseId){
+  var id=String(releaseId);
+  return (ANNOTATIONS[id]&&ANNOTATIONS[id].rating)||0;
+}
+
+
+// ── APPLE MUSIC SEARCH ─────────────────────────────────────────────────────
+async function searchAppleMusic(artist, title, wrap){
+  try{
+    var q=encodeURIComponent(artist+' '+title);
+    var r=await fetch('https://itunes.apple.com/search?term='+q+'&entity=album&limit=3&country=CH');
+    var d=await r.json();
+    if(!d.results||!d.results.length){wrap.innerHTML='';return;}
+    // Prendre le premier résultat
+    var res=d.results[0];
+    var url=res.collectionViewUrl||'';
+    if(!url){wrap.innerHTML='';return;}
+    wrap.innerHTML='<a class="acc-apple-btn" href="'+url+'" target="_blank" rel="noopener">'+
+      '<svg viewBox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>'+
+      'Écouter sur Apple Music'+
+    '</a>';
+  }catch(e){wrap.innerHTML='';}
+}
 
 function requireAuth(cb){
   if(GH_TOKEN){cb();return;}
