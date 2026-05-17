@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>JLC·collection</title>
+<title>JIL-C · Collection</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -359,7 +359,7 @@ select{background:var(--cr);border:1.5px solid var(--bd);border-radius:3px;color
 
 <script>
 var CSV_URL='https://raw.githubusercontent.com/cressije/Discogs-collection/main/jil-c-collection-20260515-2039.csv';
-var DISCOGS_TOKEN='xxDfBhKXSCfnIFEkSfchZeAPbXBxcFKTHXCfNmTt'; // mets ton token ici
+var DISCOGS_TOKEN=''; // mets ton token ici
 var RAW_COL=[];
 var RAW_WANT=[];
 var COL=[], WANT=[];
@@ -952,8 +952,7 @@ async function loadListes(){
     if(r.status===404){LISTES={};listesFileSha=null;return;}
     var d=await r.json();
     listesFileSha=d.sha;
-    LISTES=JSON.parse(atob(d.content.replace(/
-/g,'')));
+    LISTES=JSON.parse(atob(d.content.replace(/\n/g,'')));
   }catch(e){LISTES={};}
 }
 
@@ -986,7 +985,7 @@ async function renderListes(){
     var items=LISTES[name]||[];
     var row=document.createElement('div'); row.className='liste-item';
     row.innerHTML='<div><div class="liste-name">'+e(name)+'</div><div class="liste-count">'+items.length+' disque'+(items.length>1?'s':'')+'</div></div>'+
-      '<button class="liste-del" onclick="deleteListe(''+name.replace(/'/g,"\'")+'')" title="Supprimer">🗑</button>';
+      '<button class="liste-del" data-name="'+name+'" title="Supprimer">🗑</button>';
     div.appendChild(row);
   });
 }
