@@ -491,6 +491,10 @@ var DISCOGS_TOKEN='xxDfBhKXSCfnIFEkSfchZeAPbXBxcFKTHXCfNmTt';
 var RAW_COL=[];
 var RAW_WANT=[];
 var COL=[], WANT=[];
+var GH_USER='cressije';
+var GH_REPO='Discogs-collection';
+var GH_FILE='listes.json';
+var GH_ANN_FILE='annotations.json';
 
 // ── RÉSOLUTION DYNAMIQUE DU CSV ───────────────────────────────────────────
 async function resolveCSVUrl(){
@@ -1302,10 +1306,6 @@ document.querySelectorAll('.dp-star').forEach(function(s){
 
 // ── AUTH GITHUB ────────────────────────────────────────────────────────────
 var GH_TOKEN=null;
-var GH_USER='cressije';
-var GH_REPO='Discogs-collection';
-var GH_FILE='listes.json';
-var GH_ANN_FILE='annotations.json';
 var authCallback=null;
 
 var ANNOTATIONS={};
