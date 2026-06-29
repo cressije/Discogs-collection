@@ -365,7 +365,7 @@ select{background:var(--cr);border:1.5px solid var(--bd);border-radius:3px;color
 
 <main class="mn">
   <div id="v-collection">
-    <div class="ph"><div class="pt">Collection</div><div class="pc" id="cpc">20 736 enr.</div></div>
+    <div class="ph"><div class="pt">Collection</div><div class="pc" id="cpc">—</div></div>
     <div class="tb">
       <div class="si">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
@@ -379,13 +379,13 @@ select{background:var(--cr);border:1.5px solid var(--bd);border-radius:3px;color
       </select>
     </div>
     <div class="fb" id="cfb"></div>
-    <div class="ri" id="cri">20 736 enr.</div>
+    <div class="ri" id="cri">—</div>
     <div class="rl" id="cgrid"></div>
     <div class="lm" id="clm" onclick="loadMore('c')" style="display:none">↓ Charger plus</div>
   </div>
 
   <div id="v-wantlist" style="display:none">
-    <div class="ph"><div class="pt">Wantlist</div><div class="pc" id="wpc">9 223 enr.</div></div>
+    <div class="ph"><div class="pt">Wantlist</div><div class="pc" id="wpc">—</div></div>
     <div class="tb">
       <div class="si">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
@@ -397,11 +397,10 @@ select{background:var(--cr);border:1.5px solid var(--bd);border-radius:3px;color
         <option value="t">Titre A→Z</option>
       </select>
     </div>
-    <div class="ri" id="wri">9 223 enr.</div>
+    <div class="ri" id="wri">—</div>
     <div class="rl" id="wgrid"></div>
     <div class="lm" id="wlm" onclick="loadMore('w')" style="display:none">↓ Charger plus</div>
   </div>
-
 
   <div id="v-listes" style="display:none">
     <div class="ph"><div class="pt">Listes</div></div>
@@ -462,13 +461,52 @@ select{background:var(--cr);border:1.5px solid var(--bd);border-radius:3px;color
   </div>
 </div>
 
+<!-- AUTH POPUP -->
+<div class="auth-popup" id="auth-popup">
+  <div class="auth-box">
+    <h3>🔑 Token GitHub</h3>
+    <p>Saisis ton token GitHub (fine-grained) pour activer la sauvegarde des listes et annotations.</p>
+    <input type="password" id="auth-token-input" placeholder="github_pat_..." autocomplete="off" onkeydown="if(event.key==='Enter')confirmAuth()">
+    <div id="auth-error" style="color:#e03e3e;font-size:11px;margin-bottom:8px;display:none">Token invalide ou accès refusé</div>
+    <div class="auth-btns">
+      <button class="auth-cancel" onclick="closeAuth()">Annuler</button>
+      <button class="auth-ok" onclick="confirmAuth()">Valider</button>
+    </div>
+  </div>
+</div>
+
+<!-- LISTE PICKER -->
+<div class="picker-popup" id="picker-popup">
+  <div class="picker-box">
+    <h3>Ajouter à une liste</h3>
+    <div id="picker-list"></div>
+    <button class="picker-new" onclick="createNewListe()">+ Nouvelle liste</button>
+    <button class="picker-cancel" onclick="closePicker()">Annuler</button>
+  </div>
+</div>
+
 <script>
-var CSV_URL=null; // résolu dynamiquement
+var CSV_URL=null; // résolu dynamiquement au chargement
+var DISCOGS_TOKEN='xxDfBhKXSCfnIFEkSfchZeAPbXBxcFKTHXCfNmTt';
 var RAW_COL=[];
 var RAW_WANT=[];
 var COL=[], WANT=[];
 
-// Chargement et parsing des CSV Discogs directement
+// ── RÉSOLUTION DYNAMIQUE DU CSV ───────────────────────────────────────────
+async function resolveCSVUrl(){
+  var r=await fetch('https://api.github.com/repos/'+GH_USER+'/'+GH_REPO+'/git/trees/main',{
+    headers:{'Accept':'application/vnd.github.v3+json'}
+  });
+  if(!r.ok)throw new Error('Impossible de lister le repo ('+r.status+')');
+  var data=await r.json();
+  var match=data.tree.find(function(f){
+    return f.path.indexOf('jil-c-collection')===0&&f.path.endsWith('.csv');
+  });
+  if(!match)throw new Error('Aucun fichier jil-c-collection*.csv trouvé dans le repo');
+  return 'https://raw.githubusercontent.com/'+GH_USER+'/'+GH_REPO+'/main/'+match.path;
+}
+
+// ── PARSING CSV ───────────────────────────────────────────────────────────
 function parseCSV(text, isCollection){
   var lines=text.split('\n');
   var header=csvLine(lines[0]);
@@ -524,24 +562,12 @@ function normFmt(f){
   return 'Autre';
 }
 
-async function resolveCSVUrl(){
-  var r=await fetch('https://api.github.com/repos/'+GH_USER+'/'+GH_REPO+'/contents/',{
-    headers:{'Accept':'application/vnd.github.v3+json'}
-  });
-  if(!r.ok)throw new Error('Impossible de lister le repo ('+r.status+')');
-  var files=await r.json();
-  var match=files.find(function(f){
-    return f.name.indexOf('jil-c-collection')===0&&f.name.endsWith('.csv');
-  });
-  if(!match)throw new Error('Aucun fichier jil-c-collection*.csv trouvé dans le repo');
-  return match.download_url;
-}
-
 async function loadData(){
   var status=document.getElementById('load-status');
   try{
-    if(status)status.textContent='Chargement collection...';
+    if(status)status.textContent='Recherche du fichier CSV…';
     CSV_URL=await resolveCSVUrl();
+    if(status)status.textContent='Chargement collection…';
     var r1=await fetch(CSV_URL+'?v='+Date.now());
     if(!r1.ok)throw new Error('CSV introuvable ('+r1.status+')');
     var csv1=await r1.text();
@@ -596,7 +622,6 @@ async function runQ(){
       if(r.status===429){await sleep(3000);continue;}
       if(r.ok){
         var d=await r.json();
-        // Utiliser le proxy comme source d'image (cache kDrive)
         var u=d.thumb||null;
         imgCache[id]=u;
         if(d.tracklist)relCache[id]={thumb:u,tracklist:d.tracklist||[],credits:d.extraartists||[],notes:d.notes||'',styles:d.styles||[],genres:d.genres||[]};
@@ -644,7 +669,6 @@ function makeRow(r){
   div.dataset.year=String(r.year);
   div.dataset.folder=r.folder;
   div.dataset.catalog=r.catalog;
-  var yr2=r.year>1900?r.year:'—';
   var wrap=document.createElement('div');
   wrap.className='rr-wrap';
 
@@ -659,13 +683,9 @@ function makeRow(r){
     '<div class="rf">'+e(r.fmt)+'</div>'+
     '<button class="ra-toggle" title="Ouvrir/Fermer">›</button>';
 
-  // Accordéon
   var acc=document.createElement('div');
   acc.className='rr-acc';
 
-
-
-  // Accordéon — créé avec createElement pour fiabilité
   var rid=String(r.id||'');
   var yr2=r.year>1900?String(r.year):'—';
 
@@ -727,23 +747,19 @@ function makeRow(r){
   function toggleAcc(ev){
     if(ev)ev.stopPropagation();
     var alreadyOpen=acc.classList.contains('open');
-    // Fermer tous les accordéons ouverts
     document.querySelectorAll('.rr-acc.open').forEach(function(a){
       a.classList.remove('open');
     });
     document.querySelectorAll('.ra-toggle.open').forEach(function(b){
       b.classList.remove('open');
     });
-    // Si pas déjà ouvert → ouvrir
     if(!alreadyOpen){
       acc.classList.add('open');
       toggleBtn.classList.add('open');
-      // Charger depuis Discogs immédiatement
       if(r.id){loadAccordionData(r.id,acc);}
     }
   }
   toggleBtn.addEventListener('click',toggleAcc);
-  // Double-clic sur la ligne → toggle accordéon
   div.addEventListener('dblclick',function(ev){
     ev.stopPropagation();
     toggleAcc();
@@ -772,7 +788,7 @@ function renderGrid(gid,data,page){
 
 // ── FILTER/SORT ───────────────────────────────────────
 var cF=[].concat(COL), wF=[].concat(WANT), cPg=0, wPg=0;
-var aListe=null; // filtre liste actif
+var aListe=null;
 var aFmt='all', aGenre='all';
 var srchTimer=null;
 
@@ -810,14 +826,12 @@ function filterCol(){
 
 function filterByListe(name){
   aListe=name;
-  // Basculer vers la vue collection
   document.querySelectorAll('.ni').forEach(function(x){x.classList.remove('on');});
   document.querySelector('.ni[data-view="collection"]').classList.add('on');
   ['collection','wantlist','stats','listes'].forEach(function(id){
     var el=document.getElementById('v-'+id);
     if(el)el.style.display=id==='collection'?'block':'none';
   });
-  // Badge dans le header
   var badge=document.getElementById('liste-badge');
   if(name){
     if(!badge){
@@ -936,7 +950,7 @@ function buildStats(){
   document.getElementById('cgen').innerHTML=Object.entries(genres).map(function(x,i){return'<div class="br"><div class="bl">'+x[0]+'</div><div class="bt"><div class="bf" style="width:'+Math.round(x[1]/mg*100)+'%;background:'+GCOLS[i%GCOLS.length]+'"></div></div><div class="bc">'+x[1].toLocaleString('fr')+'</div></div>';}).join('');
 }
 
-// ── TABS ──────────────────────────────────────────────
+// ── TABS MODAL ────────────────────────────────────────
 document.getElementById('modal').addEventListener('click',function(ev){
   var tab=ev.target.closest('.tab');
   if(!tab)return;
@@ -960,14 +974,12 @@ function openModal(row){
   var catalog=row.dataset.catalog||'';
   var yr=year>1900?String(year):'—';
 
-  // Header — reconstruire mcw avec placeholder
   var mcw=document.getElementById('mcw');
   mcw.innerHTML='<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:40px;background:#333">'+(FMTE[fmt]||'🎵')+'</div>';
   document.getElementById('mha').textContent=artist;
   document.getElementById('mht').textContent=title;
   document.getElementById('mtags').innerHTML='';
 
-  // Left panel
   var lh='';
   if(label&&label!=='nan')lh+='<div class="mrow"><div class="mk">Label</div><div class="mv">'+e(label)+'</div></div>';
   if(format&&format!=='nan')lh+='<div class="mrow"><div class="mk">Format</div><div class="mv">'+e(format)+'</div></div>';
@@ -977,10 +989,8 @@ function openModal(row){
   if(id)lh+='<a class="dbtn" href="https://www.discogs.com/release/'+id+'" target="_blank">Voir sur Discogs →</a>';
   document.getElementById('mleft').innerHTML=lh;
 
-  // Pochette déjà en cache
   if(id&&imgCache[id]){mcw.innerHTML='<img src="'+imgCache[id]+'" alt="" style="width:100%;height:100%;object-fit:cover">';}
 
-  // Reset tabs - scopé au modal
   var modal=document.getElementById('modal');
   modal.querySelectorAll('.tab').forEach(function(t){t.classList.remove('on');});
   modal.querySelectorAll('.panel').forEach(function(p){p.classList.remove('on');});
@@ -988,7 +998,6 @@ function openModal(row){
   if(firstTab)firstTab.classList.add('on');
   document.getElementById('pt').classList.add('on');
 
-  // Reset panels
   document.getElementById('pt').innerHTML='<div class="ml2">Chargement…</div>';
   document.getElementById('pc').innerHTML='<div class="ml2">Chargement…</div>';
   document.getElementById('pn').innerHTML='<div class="ml2">Chargement…</div>';
@@ -1021,13 +1030,10 @@ async function loadModal(id){
 }
 
 function fillModal(d){
-  // Pochette
   if(d.thumb){var mcw=document.getElementById('mcw');if(mcw)mcw.innerHTML='<img src="'+d.thumb+'" alt="" style="width:100%;height:100%;object-fit:cover">';}
-  // Tags
   var tags=(d.genres||[]).concat(d.styles||[]);
   var tg=document.getElementById('mtags');
   if(tg&&tags.length)tg.innerHTML=tags.map(function(t){return'<span class="mtag">'+e(t)+'</span>';}).join('');
-  // Tracklist
   var pt=document.getElementById('pt');
   if(d.tracklist&&d.tracklist.length){
     var h='<div class="tl">';
@@ -1038,7 +1044,6 @@ function fillModal(d){
     h+='</div>';
     pt.innerHTML=h;
   } else {pt.innerHTML='<div class="ml2">Pas de tracklist.</div>';}
-  // Crédits
   var pc=document.getElementById('pc');
   if(d.credits&&d.credits.length){
     var h2='<div class="cr2">';
@@ -1046,7 +1051,6 @@ function fillModal(d){
     h2+='</div>';
     pc.innerHTML=h2;
   } else {pc.innerHTML='<div class="ml2">Aucun crédit.</div>';}
-  // Notes
   var pn=document.getElementById('pn');
   pn.innerHTML=d.notes?'<div class="notes">'+e(d.notes)+'</div>':'<div class="ml2">Aucune note.</div>';
 }
@@ -1062,16 +1066,13 @@ function openModalBg(){
   m.style.visibility='';
   m.style.pointerEvents='';
   m.classList.add('open');
-
 }
 
 // ── INIT ──────────────────────────────────────────────
-// Fermer modal en cliquant dehors
 document.getElementById('modal').addEventListener('click',function(ev){
   if(ev.target===this)closeModal();
 });
 
-// Délégation clics sur les grids
 function setupGrid(gid){
   document.getElementById(gid).addEventListener('click',function(ev){
     if(ev.target.closest('.ra-toggle'))return;
@@ -1085,22 +1086,17 @@ function setupGrid(gid){
 setupGrid('cgrid');
 setupGrid('wgrid');
 
-
 loadData();
 loadAnnotations();
 
 // ── DETAIL PANEL ──────────────────────────────────────────────────────────
 var detailRow=null;
 
-
-
 function loadAccordionData(id, acc){
   var trackPanel=document.getElementById('acc-track-'+id);
   if(!trackPanel)return;
-  // Déjà chargé avec du contenu réel
   if(trackPanel.dataset.loaded==='1')return;
   trackPanel.dataset.loaded='1';
-  // Afficher "Chargement" dans tous les panels
   ['acc-track','acc-credits','acc-notes'].forEach(function(p){
     var el=document.getElementById(p+'-'+id);
     if(el&&!el.dataset.loaded)el.innerHTML='<div style="color:var(--mu);font-size:12px;padding:8px 0">Chargement…</div>';
@@ -1110,7 +1106,6 @@ function loadAccordionData(id, acc){
     fillAccordion(id, acc, relCache[id]);
     return;
   }
-  // Charger depuis Discogs
   fetch('https://api.discogs.com/releases/'+id,{
     headers:{'Authorization':'Discogs token='+DISCOGS_TOKEN,'User-Agent':'TouchableMusicCollection/1.0'}
   }).then(function(r){
@@ -1126,11 +1121,9 @@ function loadAccordionData(id, acc){
 }
 
 function fillAccordion(id, acc, d){
-  // Bouton Apple Music — AU-DESSUS des onglets, visible depuis tous les onglets
   var appleWrap=acc.querySelector('.acc-apple-wrap');
   if(!appleWrap){
     appleWrap=document.createElement('div'); appleWrap.className='acc-apple-wrap';
-    // Insérer avant les tabs (premier enfant de acc)
     acc.insertBefore(appleWrap, acc.firstChild);
   }
   var row=acc.closest('.rr-wrap')&&acc.closest('.rr-wrap').querySelector('.rr');
@@ -1139,11 +1132,9 @@ function fillAccordion(id, acc, d){
     appleWrap.textContent='🔍';
     searchAppleMusic(row.dataset.artist||'',row.dataset.title||'',appleWrap);
   }
-  // Tracklist
   var tp=document.getElementById('acc-track-'+id);
   if(tp){
     if(d.tracklist&&d.tracklist.length){
-      var trackStars={};
       tp.innerHTML=d.tracklist.map(function(t,i){
         if(t.type_==='heading')return '<div class="acc-track-heading">'+e(t.title)+'</div>';
         return '<div class="acc-track" data-ti="'+i+'">'+
@@ -1153,10 +1144,8 @@ function fillAccordion(id, acc, d){
           '<span class="acc-tdur">'+e(t.duration||'')+'</span>'+
         '</div>';
       }).join('');
-      // Points colorés cliquables (cycle : vide → rouge → jaune → bleu → vide)
       var states=['0','r','y','b'];
       tp.querySelectorAll('.acc-tdot').forEach(function(dot,idx){
-        // Restaurer l'état sauvegardé
         var tpos=d.tracklist[idx]&&d.tracklist[idx].position||String(idx);
         var saved=getTrackAnnotation(id,tpos);
         dot.dataset.state=saved;
@@ -1169,7 +1158,6 @@ function fillAccordion(id, acc, d){
           var next=states[(cur+1)%states.length];
           this.dataset.state=next;
           this.className='acc-tdot'+(next!=='0'?' '+next:'');
-          // Sauvegarder
           if(GH_TOKEN){
             setTrackAnnotation(id,this.dataset.pos,next);
           } else {
@@ -1179,7 +1167,6 @@ function fillAccordion(id, acc, d){
       });
     } else { tp.innerHTML='<div style="color:var(--mu);font-size:12px">Aucune tracklist</div>'; }
   }
-  // Crédits
   var cp=document.getElementById('acc-credits-'+id);
   if(cp){
     if(d.credits&&d.credits.length){
@@ -1192,7 +1179,6 @@ function fillAccordion(id, acc, d){
       }).join('');
     } else { cp.innerHTML='<div style="color:var(--mu);font-size:12px">Aucun crédit</div>'; }
   }
-  // Notes
   var np=document.getElementById('acc-notes-'+id);
   if(np){
     np.innerHTML=d.notes?'<div class="acc-notes">'+e(d.notes)+'</div>':'<div style="color:var(--mu);font-size:12px">Aucune note</div>';
@@ -1212,7 +1198,6 @@ async function renderDpListes(id){
   var wrap=document.getElementById('dp-in-listes');
   var tags=document.getElementById('dp-in-listes-tags');
   tags.innerHTML='';
-  // Charger LISTES si pas encore fait (lecture seule, sans token)
   if(!Object.keys(LISTES).length){
     try{
       var r=await fetch('https://raw.githubusercontent.com/'+GH_USER+'/'+GH_REPO+'/main/'+GH_FILE+'?v='+Date.now());
@@ -1254,17 +1239,14 @@ function openDetail(row){
   document.getElementById('dp-title').textContent=title;
   document.getElementById('dp-meta').textContent=[yr,format,label].filter(function(x){return x&&x!=='nan';}).join(' · ');
 
-  // Étoiles — restaurer depuis annotations
   var rid2=row.dataset.rid||'';
   var savedRating=getRatingAnnotation(rid2);
   if(savedRating)row.dataset.rating=String(savedRating);
   var rating=parseInt(row.dataset.rating)||savedRating||0;
   renderStars(rating);
 
-  // Listes contenant ce disque
   renderDpListes(id);
 
-  // Pochette
   var img=document.getElementById('dp-img');
   var ph=document.getElementById('dp-ph');
   img.style.display='none'; ph.style.display='flex';
@@ -1278,7 +1260,6 @@ function openDetail(row){
     }
   }
 
-  // Cacher le menu normal, afficher le détail
   document.getElementById('sb-normal').style.display='none';
   document.getElementById('detail-panel').classList.add('open');
 }
@@ -1333,11 +1314,9 @@ var GH_FILE='listes.json';
 var GH_ANN_FILE='annotations.json';
 var authCallback=null;
 
-// Annotations {releaseId: {tracks:{pos:'r'|'y'|'b'}, rating:0-5}}
 var ANNOTATIONS={};
 var annFileSha=null;
 var annSaveTimer=null;
-
 
 // ── ANNOTATIONS ────────────────────────────────────────────────────────────
 async function loadAnnotations(){
@@ -1351,7 +1330,6 @@ async function loadAnnotations(){
 async function saveAnnotations(){
   if(!GH_TOKEN)return;
   try{
-    // Récupérer le SHA actuel
     var r=await fetch('https://api.github.com/repos/'+GH_USER+'/'+GH_REPO+'/contents/'+GH_ANN_FILE,{
       headers:{'Authorization':'token '+GH_TOKEN,'Accept':'application/vnd.github.v3+json'}
     });
@@ -1373,7 +1351,7 @@ function scheduleSave(){
   clearTimeout(annSaveTimer);
   annSaveTimer=setTimeout(function(){
     if(GH_TOKEN)saveAnnotations();
-  },2000); // debounce 2s
+  },2000);
 }
 
 function setTrackAnnotation(releaseId,pos,state){
@@ -1404,7 +1382,6 @@ function getRatingAnnotation(releaseId){
   return (ANNOTATIONS[id]&&ANNOTATIONS[id].rating)||0;
 }
 
-
 // ── APPLE MUSIC SEARCH ─────────────────────────────────────────────────────
 async function searchAppleMusic(artist, title, wrap){
   try{
@@ -1412,7 +1389,6 @@ async function searchAppleMusic(artist, title, wrap){
     var r=await fetch('https://itunes.apple.com/search?term='+q+'&entity=album&limit=3&country=CH');
     var d=await r.json();
     if(!d.results||!d.results.length){wrap.innerHTML='';return;}
-    // Prendre le premier résultat
     var res=d.results[0];
     var url=res.collectionViewUrl||'';
     if(!url){wrap.innerHTML='';return;}
@@ -1461,7 +1437,7 @@ async function confirmAuth(){
 }
 
 // ── LISTES GITHUB ──────────────────────────────────────────────────────────
-var LISTES={};  // {nomListe: [{id, artist, title, year, format}]}
+var LISTES={};
 var listesFileSha=null;
 
 async function loadListes(){
@@ -1566,13 +1542,11 @@ async function addToListe(name){
     format:detailRow.dataset.fmt||''
   };
   if(!LISTES[name])LISTES[name]=[];
-  // Éviter doublons
   var exists=LISTES[name].some(function(x){return x.id===item.id;});
   if(exists){alert('Déjà dans cette liste !');closePicker();return;}
   LISTES[name].push(item);
   await saveListes();
   closePicker();
-  // Feedback
   var btn=document.querySelector('.dp-btn.primary');
   if(btn){var orig=btn.innerHTML;btn.innerHTML='✓ Ajouté !';setTimeout(function(){btn.innerHTML=orig;},1500);}
 }
@@ -1585,41 +1559,8 @@ async function createNewListe(){
   LISTES[name]=[];
   await saveListes();
   closePicker();
-  // Rouvrir le picker
   setTimeout(showPicker,200);
 }
-
-
-
-
 </script>
-
-
-
-
-<!-- AUTH POPUP -->
-<div class="auth-popup" id="auth-popup">
-  <div class="auth-box">
-    <h3>🔑 Token GitHub</h3>
-    <p>Saisis ton token GitHub (fine-grained) pour activer la sauvegarde des listes et annotations.</p>
-    <input type="password" id="auth-token-input" placeholder="github_pat_..." autocomplete="off" onkeydown="if(event.key==='Enter')confirmAuth()">
-    <div id="auth-error" style="color:#e03e3e;font-size:11px;margin-bottom:8px;display:none">Token invalide ou accès refusé</div>
-    <div class="auth-btns">
-      <button class="auth-cancel" onclick="closeAuth()">Annuler</button>
-      <button class="auth-ok" onclick="confirmAuth()">Valider</button>
-    </div>
-  </div>
-</div>
-
-<!-- LISTE PICKER -->
-<div class="picker-popup" id="picker-popup">
-  <div class="picker-box">
-    <h3>Ajouter à une liste</h3>
-    <div id="picker-list"></div>
-    <button class="picker-new" onclick="createNewListe()">+ Nouvelle liste</button>
-    <button class="picker-cancel" onclick="closePicker()">Annuler</button>
-  </div>
-</div>
-
 </body>
 </html>
