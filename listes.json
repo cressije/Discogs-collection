@@ -1,6 +1,14 @@
 {
   "Disco/Boogie": [],
-  "HipHop/BoomBap": [],
+  "HipHop/BoomBap": [
+    {
+      "id": 869240,
+      "artist": "2Pac",
+      "title": "How Do U Want It",
+      "year": 1996,
+      "format": "12\""
+    }
+  ],
   "AOR/SoftRock": [
     {
       "id": 3344574,
